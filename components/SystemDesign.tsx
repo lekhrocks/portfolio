@@ -80,177 +80,328 @@ function Arrow({
 }
 
 /* ─────────────────────────────────────────────────────────
-   Diagram 1: Router Service Architecture
+   Diagram 1: Router Service Architecture (Redesigned)
 ───────────────────────────────────────────────────────── */
 function RouterServiceDiagram() {
   return (
-    <svg viewBox="0 0 800 420" className="w-full h-auto" style={{ maxHeight: 420 }}>
+    <svg viewBox="0 0 860 500" className="w-full h-auto" style={{ maxHeight: 500 }}>
+      <defs>
+        <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6" />
+        </marker>
+        <marker id="arr-cyan" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#06b6d4" />
+        </marker>
+        <marker id="arr-purple" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#8b5cf6" />
+        </marker>
+        <marker id="arr-green" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#10b981" />
+        </marker>
+        <marker id="arr-red" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#ef4444" />
+        </marker>
+        <marker id="arr-orange" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#f97316" />
+        </marker>
+      </defs>
+
       {/* Background */}
-      <rect width="800" height="420" fill="#050510" rx={12} />
+      <rect width="860" height="500" fill="#050510" rx={12} />
+
+      {/* ── Layer bands ── */}
+      <rect x={0} y={0}   width={860} height={90}  fill="rgba(59,130,246,0.04)"  />
+      <rect x={0} y={90}  width={860} height={100} fill="rgba(6,182,212,0.04)"   />
+      <rect x={0} y={190} width={860} height={120} fill="rgba(139,92,246,0.04)"  />
+      <rect x={0} y={310} width={860} height={100} fill="rgba(16,185,129,0.04)"  />
+      <rect x={0} y={410} width={860} height={90}  fill="rgba(59,130,246,0.03)"  />
 
       {/* Layer labels */}
-      {[
-        { x: 10, y: 25, text: "CLIENT TIER", color: "#3b82f6" },
-        { x: 10, y: 125, text: "INGRESS LAYER", color: "#06b6d4" },
-        { x: 10, y: 225, text: "ROUTING CORE", color: "#8b5cf6" },
-        { x: 10, y: 325, text: "BACKEND TIER", color: "#10b981" },
-      ].map((l) => (
-        <text key={l.text} x={l.x} y={l.y} fill={l.color} fontSize={8} fontFamily="monospace" fontWeight={700} letterSpacing="1">
-          {l.text}
-        </text>
+      <text x={14} y={20}  fill="#3b82f6" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">CLIENT TIER</text>
+      <text x={14} y={108} fill="#06b6d4" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">INGRESS LAYER</text>
+      <text x={14} y={208} fill="#8b5cf6" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">ROUTING CORE</text>
+      <text x={14} y={328} fill="#10b981" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">BACKEND TIER</text>
+      <text x={14} y={428} fill="#3b82f6" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">OBSERVABILITY</text>
+
+      {/* Separators */}
+      {[90, 190, 310, 410].map(y => (
+        <line key={y} x1={0} y1={y} x2={860} y2={y} stroke="#1e293b" strokeWidth={1} />
       ))}
 
-      {/* Separator lines */}
-      {[100, 200, 300].map((y) => (
-        <line key={y} x1={0} y1={y} x2={800} y2={y} stroke="#1e293b" strokeWidth={1} />
-      ))}
-
-      {/* CLIENT TIER */}
-      <Node x={60} y={35} w={100} h={36} label="Web Client" fill="#0f172a" stroke="#3b82f6" />
-      <Node x={200} y={35} w={100} h={36} label="Mobile Client" fill="#0f172a" stroke="#3b82f6" />
-      <Node x={340} y={35} w={120} h={36} label="3rd Party Service" fill="#0f172a" stroke="#3b82f6" />
-
-      {/* Arrows: clients → Rate Limiter */}
-      <Arrow x1={110} y1={71} x2={290} y2={110} color="#3b82f6" />
-      <Arrow x1={250} y1={71} x2={310} y2={110} color="#3b82f6" />
-      <Arrow x1={400} y1={71} x2={330} y2={110} color="#3b82f6" label="HTTP/WS" />
-
-      {/* INGRESS LAYER */}
-      <Node x={190} y={108} w={110} h={36} label="Rate Limiter" sublabel="Token Bucket" fill="#1e293b" stroke="#06b6d4" />
-      <Node x={370} y={108} w={120} h={36} label="Auth Middleware" sublabel="JWT / API Key" fill="#1e293b" stroke="#06b6d4" />
-      <Arrow x1={300} y1={126} x2={370} y2={126} color="#06b6d4" />
-      <Arrow x1={490} y1={126} x2={540} y2={200} color="#06b6d4" label="allowed" />
-      <Arrow x1={245} y1={144} x2={245} y2={200} color="#06b6d4" />
-
-      {/* ROUTING CORE */}
-      <Node x={170} y={208} w={130} h={36} label="Router Engine" sublabel="Regex Rule Matching" fill="#1a1035" stroke="#8b5cf6" />
-      <Node x={380} y={195} w={100} h={28} label="Circuit Breaker" fill="#1a1035" stroke="#ef4444" />
-      <Node x={520} y={195} w={100} h={28} label="Retry + Backoff" fill="#1a1035" stroke="#f97316" />
-      <Node x={380} y={235} w={100} h={28} label="Load Balancer" sublabel="RR / Random / LC" fill="#1a1035" stroke="#8b5cf6" />
-
-      <Arrow x1={300} y1={226} x2={380} y2={226} color="#8b5cf6" />
-      <Arrow x1={480} y1={209} x2={520} y2={209} color="#ef4444" />
-      <Arrow x1={430} y1={223} x2={430} y2={235} color="#8b5cf6" />
-
-      {/* BACKEND TIER */}
-      <Node x={60} y={322} w={100} h={36} label="Service A" sublabel=":8081" fill="#0f2d1f" stroke="#10b981" />
-      <Node x={195} y={322} w={100} h={36} label="Service B" sublabel=":8082" fill="#0f2d1f" stroke="#10b981" />
-      <Node x={330} y={322} w={100} h={36} label="Service C" sublabel=":8083" fill="#0f2d1f" stroke="#10b981" />
-      <Node x={465} y={322} w={100} h={36} label="Service D" sublabel=":8084" fill="#0f2d1f" stroke="#10b981" />
-
-      {/* LB → Services */}
-      <Arrow x1={420} y1={263} x2={110} y2={322} color="#10b981" />
-      <Arrow x1={430} y1={263} x2={245} y2={322} color="#10b981" />
-      <Arrow x1={440} y1={263} x2={380} y2={322} color="#10b981" />
-      <Arrow x1={450} y1={263} x2={515} y2={322} color="#10b981" />
-
-      {/* Observability Panel */}
-      <rect x={590} y={108} width={185} height={200} rx={10} fill="#0a1628" stroke="#1e3a5f" strokeWidth={1} />
-      <text x={682} y={128} textAnchor="middle" fill="#3b82f6" fontSize={9} fontFamily="monospace" fontWeight={700}>
-        OBSERVABILITY
-      </text>
+      {/* ── TIER 1: Clients (evenly spaced) ── */}
       {[
-        { y: 148, label: "Prometheus Metrics", color: "#f97316" },
-        { y: 168, label: "Spring Actuator", color: "#06b6d4" },
-        { y: 188, label: "Centralized Logging", color: "#10b981" },
-        { y: 208, label: "WS Metrics Stream", color: "#8b5cf6" },
-        { y: 228, label: "Live Traffic Dashboard", color: "#ec4899" },
-        { y: 248, label: "Health Endpoints", color: "#3b82f6" },
-        { y: 268, label: "Load Test: 10K+ RPS", color: "#f59e0b" },
-        { y: 288, label: "Stress: 1M+ Requests", color: "#ef4444" },
-      ].map(({ y, label, color }) => (
+        { x: 100, label: "Web Client",       sub: "Browser" },
+        { x: 290, label: "Mobile Client",    sub: "iOS / Android" },
+        { x: 480, label: "API Consumer",     sub: "3rd Party" },
+        { x: 665, label: "Internal Service", sub: "Microservice" },
+      ].map(({ x, label, sub }) => (
         <g key={label}>
-          <circle cx={605} cy={y - 4} r={2.5} fill={color} />
-          <text x={614} y={y} fill="#94a3b8" fontSize={9} fontFamily="monospace">{label}</text>
+          <rect x={x} y={25} width={130} height={44} rx={8} fill="#0f172a" stroke="#3b82f6" strokeWidth={1} style={{ filter: "drop-shadow(0 0 6px #3b82f644)" }} />
+          <text x={x + 65} y={44} textAnchor="middle" fill="#e2e8f0" fontSize={11} fontWeight={600} fontFamily="monospace">{label}</text>
+          <text x={x + 65} y={58} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">{sub}</text>
         </g>
       ))}
 
-      {/* Arrow to Observability */}
-      <Arrow x1={580} y1={209} x2={590} y2={209} color="#1e3a5f" />
+      {/* Clients → Rate Limiter (straight down to center) */}
+      {[165, 355, 545, 730].map(x => (
+        <line key={x} x1={x} y1={69} x2={430} y2={100} stroke="#3b82f6" strokeWidth={1.2} strokeDasharray="4 3" opacity={0.5} markerEnd="url(#arr-blue)" />
+      ))}
+      <text x={440} y={88} fill="#3b82f644" fontSize={8} fontFamily="monospace">HTTP / WebSocket / gRPC</text>
 
-      {/* Title */}
-      <text x={400} y={400} textAnchor="middle" fill="#334155" fontSize={10} fontFamily="monospace">
-        Router Service — High-Performance API Gateway Architecture
-      </text>
+      {/* ── TIER 2: Ingress ── */}
+      {/* Rate Limiter */}
+      <rect x={190} y={103} width={150} height={48} rx={8} fill="#0a1a2e" stroke="#06b6d4" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 8px #06b6d444)" }} />
+      <text x={265} y={123} textAnchor="middle" fill="#06b6d4" fontSize={12} fontWeight={700} fontFamily="monospace">Rate Limiter</text>
+      <text x={265} y={140} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">Token Bucket Algorithm</text>
+
+      {/* Auth Middleware */}
+      <rect x={500} y={103} width={160} height={48} rx={8} fill="#0a1a2e" stroke="#06b6d4" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 8px #06b6d444)" }} />
+      <text x={580} y={123} textAnchor="middle" fill="#06b6d4" fontSize={12} fontWeight={700} fontFamily="monospace">Auth Middleware</text>
+      <text x={580} y={140} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">JWT / API Key / OAuth2</text>
+
+      {/* Rate Limiter → Auth */}
+      <line x1={340} y1={127} x2={500} y2={127} stroke="#06b6d4" strokeWidth={1.5} markerEnd="url(#arr-cyan)" />
+      <text x={420} y={121} textAnchor="middle" fill="#06b6d4" fontSize={8} fontFamily="monospace">pass</text>
+
+      {/* ── TIER 3: Routing Core ── */}
+      {/* Router Engine — left */}
+      <rect x={60} y={205} width={165} height={52} rx={8} fill="#130f2d" stroke="#8b5cf6" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 8px #8b5cf644)" }} />
+      <text x={143} y={226} textAnchor="middle" fill="#c4b5fd" fontSize={12} fontWeight={700} fontFamily="monospace">Router Engine</text>
+      <text x={143} y={242} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">Regex Rule Matching</text>
+      <text x={143} y={252} textAnchor="middle" fill="#374151" fontSize={8} fontFamily="monospace">Path · Header · Method</text>
+
+      {/* Circuit Breaker */}
+      <rect x={295} y={200} width={145} height={48} rx={8} fill="#1a0f0f" stroke="#ef4444" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 8px #ef444444)" }} />
+      <text x={368} y={221} textAnchor="middle" fill="#fca5a5" fontSize={12} fontWeight={700} fontFamily="monospace">Circuit Breaker</text>
+      <text x={368} y={237} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">CLOSED · OPEN · HALF</text>
+
+      {/* Retry + Backoff */}
+      <rect x={295} y={260} width={145} height={44} rx={8} fill="#1a1200" stroke="#f97316" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 8px #f9731644)" }} />
+      <text x={368} y={279} textAnchor="middle" fill="#fdba74" fontSize={12} fontWeight={700} fontFamily="monospace">Retry + Backoff</text>
+      <text x={368} y={294} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">Exponential · Jitter</text>
+
+      {/* Load Balancer */}
+      <rect x={510} y={215} width={165} height={52} rx={8} fill="#130f2d" stroke="#8b5cf6" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 8px #8b5cf644)" }} />
+      <text x={593} y={236} textAnchor="middle" fill="#c4b5fd" fontSize={12} fontWeight={700} fontFamily="monospace">Load Balancer</text>
+      <text x={593} y={252} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">Round Robin · Random</text>
+      <text x={593} y={262} textAnchor="middle" fill="#374151" fontSize={8} fontFamily="monospace">Least Connections</text>
+
+      {/* Auth → Router Engine */}
+      <line x1={500} y1={145} x2={200} y2={205} stroke="#8b5cf6" strokeWidth={1.5} markerEnd="url(#arr-purple)" />
+      <text x={330} y={168} textAnchor="middle" fill="#8b5cf6" fontSize={8} fontFamily="monospace">route</text>
+
+      {/* Router → Circuit Breaker */}
+      <line x1={225} y1={231} x2={295} y2={224} stroke="#8b5cf6" strokeWidth={1.5} markerEnd="url(#arr-purple)" />
+
+      {/* Circuit Breaker → Retry */}
+      <line x1={368} y1={248} x2={368} y2={260} stroke="#ef4444" strokeWidth={1.2} strokeDasharray="3 2" markerEnd="url(#arr-red)" />
+      <text x={380} y={256} fill="#ef4444" fontSize={8} fontFamily="monospace">fail</text>
+
+      {/* Circuit Breaker → Load Balancer */}
+      <line x1={440} y1={224} x2={510} y2={235} stroke="#8b5cf6" strokeWidth={1.5} markerEnd="url(#arr-purple)" />
+      <text x={475} y={224} textAnchor="middle" fill="#8b5cf6" fontSize={8} fontFamily="monospace">allow</text>
+
+      {/* ── TIER 4: Backend Services ── */}
+      {[
+        { x: 80,  port: ":8081", label: "Service A" },
+        { x: 240, port: ":8082", label: "Service B" },
+        { x: 400, port: ":8083", label: "Service C" },
+        { x: 560, port: ":8084", label: "Service D" },
+        { x: 720, port: ":8085", label: "Service E" },
+      ].map(({ x, port, label }) => (
+        <g key={label}>
+          <rect x={x} y={325} width={110} height={44} rx={8} fill="#0a1f14" stroke="#10b981" strokeWidth={1} style={{ filter: "drop-shadow(0 0 6px #10b98133)" }} />
+          <text x={x + 55} y={344} textAnchor="middle" fill="#6ee7b7" fontSize={11} fontWeight={600} fontFamily="monospace">{label}</text>
+          <text x={x + 55} y={358} textAnchor="middle" fill="#374151" fontSize={9} fontFamily="monospace">{port}</text>
+        </g>
+      ))}
+
+      {/* Load Balancer → Services */}
+      {[135, 295, 455, 615, 775].map((x, i) => (
+        <line key={i} x1={593} y1={267} x2={x} y2={325} stroke="#10b981" strokeWidth={1.2} strokeDasharray="4 3" opacity={0.6} markerEnd="url(#arr-green)" />
+      ))}
+
+      {/* ── TIER 5: Observability ── */}
+      {[
+        { x: 60,  label: "Prometheus",    sub: "Metrics / Alerts",    color: "#f97316" },
+        { x: 210, label: "Spring Actuator", sub: "Health / Info",      color: "#06b6d4" },
+        { x: 365, label: "WS Dashboard",  sub: "Live Traffic View",    color: "#8b5cf6" },
+        { x: 515, label: "Centralized Log", sub: "ELK / Loki",         color: "#10b981" },
+        { x: 665, label: "Load Testing",  sub: "10K+ RPS · 1M+ req",  color: "#f59e0b" },
+      ].map(({ x, label, sub, color }) => (
+        <g key={label}>
+          <rect x={x} y={425} width={130} height={44} rx={8} fill="#0a0a1a" stroke={color} strokeWidth={1} opacity={0.9} />
+          <text x={x + 65} y={444} textAnchor="middle" fill={color} fontSize={10} fontWeight={600} fontFamily="monospace">{label}</text>
+          <text x={x + 65} y={458} textAnchor="middle" fill="#475569" fontSize={8} fontFamily="monospace">{sub}</text>
+        </g>
+      ))}
+
+      {/* Services → Observability arrows */}
+      {[125, 295, 455].map((x, i) => (
+        <line key={i} x1={x} y1={369} x2={[125, 275, 430][i]} y2={425} stroke="#1e293b" strokeWidth={1} strokeDasharray="3 3" opacity={0.4} />
+      ))}
     </svg>
   );
 }
 
 /* ─────────────────────────────────────────────────────────
-   Diagram 2: Microservices + Kafka Event Pipeline
+   Diagram 2: Microservices + Kafka Event Pipeline (Redesigned)
 ───────────────────────────────────────────────────────── */
 function MicroservicesKafkaDiagram() {
   return (
-    <svg viewBox="0 0 800 450" className="w-full h-auto" style={{ maxHeight: 450 }}>
-      <rect width="800" height="450" fill="#050510" rx={12} />
+    <svg viewBox="0 0 900 540" className="w-full h-auto" style={{ maxHeight: 540 }}>
+      <defs>
+        <marker id="mk-blue"   markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3b82f6" /></marker>
+        <marker id="mk-cyan"   markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#06b6d4" /></marker>
+        <marker id="mk-purple" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#8b5cf6" /></marker>
+        <marker id="mk-green"  markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#10b981" /></marker>
+        <marker id="mk-orange" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#f97316" /></marker>
+        <marker id="mk-slate"  markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569" /></marker>
+      </defs>
 
-      {/* Section separators */}
-      <line x1="0" y1="80" x2="800" y2="80" stroke="#1e293b" strokeWidth={1} />
-      <line x1="0" y1="360" x2="800" y2="360" stroke="#1e293b" strokeWidth={1} />
+      {/* Background */}
+      <rect width="900" height="540" fill="#050510" rx={12} />
 
-      {/* API GATEWAY */}
-      <text x={12} y={25} fill="#06b6d4" fontSize={8} fontFamily="monospace" fontWeight={700} letterSpacing="1">INGRESS</text>
-      <Node x={90} y={28} w={140} h={36} label="API Gateway" sublabel="Auth / Rate Limit / Route" fill="#0a1a2e" stroke="#06b6d4" />
-      <Node x={290} y={28} w={100} h={36} label="Load Balancer" sublabel="K8s Ingress" fill="#0a1a2e" stroke="#06b6d4" />
-      <Arrow x1={230} y1={46} x2={290} y2={46} color="#06b6d4" />
+      {/* Layer bands */}
+      <rect x={0} y={0}   width={900} height={80}  fill="rgba(6,182,212,0.04)"   />
+      <rect x={0} y={80}  width={900} height={110} fill="rgba(139,92,246,0.04)"  />
+      <rect x={0} y={190} width={900} height={130} fill="rgba(16,185,129,0.05)"  />
+      <rect x={0} y={320} width={900} height={110} fill="rgba(249,115,22,0.04)"  />
+      <rect x={0} y={430} width={900} height={110} fill="rgba(59,130,246,0.03)"  />
 
-      {/* Microservices Row */}
-      <text x={12} y={108} fill="#8b5cf6" fontSize={8} fontFamily="monospace" fontWeight={700} letterSpacing="1">MICROSERVICES</text>
-      <Node x={30} y={115} w={110} h={38} label="Billing Service" sublabel="PayPal · Stripe" fill="#130f2d" stroke="#8b5cf6" />
-      <Node x={175} y={115} w={110} h={38} label="Payment Service" sublabel="Stripe · Billpay" fill="#130f2d" stroke="#8b5cf6" />
-      <Node x={320} y={115} w={110} h={38} label="Checkout Service" sublabel="Cart · Order" fill="#130f2d" stroke="#8b5cf6" />
-      <Node x={465} y={115} w={120} h={38} label="Notification Service" sublabel="Email · SMS · Push" fill="#130f2d" stroke="#8b5cf6" />
-      <Node x={620} y={115} w={110} h={38} label="Auth Service" sublabel="OAuth2 · JWT" fill="#130f2d" stroke="#ec4899" />
-
-      {/* LB → Services */}
-      <Arrow x1={340} y1={64} x2={85} y2={115} color="#3b82f6" />
-      <Arrow x1={360} y1={64} x2={230} y2={115} color="#3b82f6" />
-      <Arrow x1={380} y1={64} x2={375} y2={115} color="#3b82f6" />
-      <Arrow x1={395} y1={64} x2={500} y2={115} color="#3b82f6" />
-
-      {/* KAFKA CLUSTER — center */}
-      <rect x={140} y={200} width={440} height={65} rx={10} fill="#0d1a0d" stroke="#10b981" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 12px #10b98144)" }} />
-      <text x={360} y={220} textAnchor="middle" fill="#10b981" fontSize={11} fontFamily="monospace" fontWeight={700}>Apache Kafka Cluster</text>
-      <text x={360} y={237} textAnchor="middle" fill="#6b7280" fontSize={9} fontFamily="monospace">billing-events · payment-events · notification-events · audit-events</text>
-      {[170, 230, 290, 350, 410, 470, 530].map((x) => (
-        <rect key={x} x={x} y={248} width={50} height={14} rx={3} fill="#0a2a0a" stroke="#10b98166" strokeWidth={1} />
+      {/* Separators */}
+      {[80, 190, 320, 430].map(y => (
+        <line key={y} x1={0} y1={y} x2={900} y2={y} stroke="#1e293b" strokeWidth={1} />
       ))}
-      <text x={360} y={258} textAnchor="middle" fill="#374151" fontSize={7.5} fontFamily="monospace">Partitioned Topics — Horizontal Scale — Replay — Fault Tolerant</text>
 
-      {/* Services → Kafka (Producers) */}
-      <Arrow x1={85} y1={153} x2={200} y2={200} color="#10b981" label="publish" />
-      <Arrow x1={230} y1={153} x2={280} y2={200} color="#10b981" label="publish" />
-      <Arrow x1={375} y1={153} x2={360} y2={200} color="#10b981" />
-      <Arrow x1={520} y1={153} x2={450} y2={200} color="#10b981" label="publish" />
+      {/* Layer Labels */}
+      <text x={14} y={18}  fill="#06b6d4" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">INGRESS</text>
+      <text x={14} y={98}  fill="#8b5cf6" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">PRODUCER SERVICES</text>
+      <text x={14} y={208} fill="#10b981" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">KAFKA EVENT BUS</text>
+      <text x={14} y={338} fill="#f97316" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">CONSUMER SERVICES</text>
+      <text x={14} y={448} fill="#3b82f6" fontSize={9} fontFamily="monospace" fontWeight={700} letterSpacing="2">DATASTORES &amp; OBSERVABILITY</text>
 
-      {/* Kafka → Services (Consumers) */}
-      <Arrow x1={220} y1={265} x2={85} y2={285} color="#f97316" label="consume" />
-      <Arrow x1={320} y1={265} x2={230} y2={285} color="#f97316" label="consume" />
-      <Arrow x1={400} y1={265} x2={520} y2={285} color="#f97316" label="consume" />
+      {/* ── INGRESS ROW ── */}
+      {/* API Gateway */}
+      <rect x={80} y={18} width={170} height={48} rx={8} fill="#0a1a2e" stroke="#06b6d4" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 8px #06b6d444)" }} />
+      <text x={165} y={38} textAnchor="middle" fill="#06b6d4" fontSize={12} fontWeight={700} fontFamily="monospace">API Gateway</text>
+      <text x={165} y={54} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">Auth · Rate Limit · Route</text>
 
-      {/* Consumer Services */}
-      <Node x={30} y={285} w={115} h={34} label="Billing Consumer" sublabel="Retry + DLQ" fill="#1a1000" stroke="#f97316" />
-      <Node x={175} y={285} w={115} h={34} label="Payment Processor" sublabel="Idempotent" fill="#1a1000" stroke="#f97316" />
-      <Node x={460} y={285} w={120} h={34} label="Notification Consumer" sublabel="Email · SMS" fill="#1a1000" stroke="#f97316" />
+      {/* K8s Load Balancer */}
+      <rect x={310} y={18} width={160} height={48} rx={8} fill="#0a1a2e" stroke="#06b6d4" strokeWidth={1.5} style={{ filter: "drop-shadow(0 0 8px #06b6d444)" }} />
+      <text x={390} y={38} textAnchor="middle" fill="#06b6d4" fontSize={12} fontWeight={700} fontFamily="monospace">Load Balancer</text>
+      <text x={390} y={54} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">K8s Ingress · Helm</text>
 
-      {/* Datastores Row */}
-      <text x={12} y={378} fill="#3b82f6" fontSize={8} fontFamily="monospace" fontWeight={700} letterSpacing="1">DATASTORES</text>
-      <Node x={30} y={385} w={90} h={34} label="PostgreSQL" sublabel="Billing DB" fill="#0a1628" stroke="#3b82f6" />
-      <Node x={150} y={385} w={90} h={34} label="MySQL" sublabel="Payment DB" fill="#0a1628" stroke="#3b82f6" />
-      <Node x={270} y={385} w={80} h={34} label="MongoDB" sublabel="Orders" fill="#0a1628" stroke="#22c55e" />
-      <Node x={375} y={385} w={80} h={34} label="Redis" sublabel="Cache / Session" fill="#0a1628" stroke="#ef4444" />
-      <Node x={480} y={385} w={90} h={34} label="Elasticsearch" sublabel="Logs / Search" fill="#0a1628" stroke="#f59e0b" />
-      <Node x={595} y={385} w={90} h={34} label="Prometheus" sublabel="Metrics" fill="#0a1628" stroke="#f97316" />
-      <Node x={700} y={385} w={80} h={34} label="Datadog" sublabel="APM / Traces" fill="#0a1628" stroke="#8b5cf6" />
+      {/* CI/CD */}
+      <rect x={540} y={18} width={150} height={48} rx={8} fill="#0a1a2e" stroke="#06b6d4" strokeWidth={1.2} />
+      <text x={615} y={38} textAnchor="middle" fill="#67e8f9" fontSize={12} fontWeight={700} fontFamily="monospace">CI / CD Pipeline</text>
+      <text x={615} y={54} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">GitHub Actions · Jenkins</text>
 
-      {/* Consumer → DB arrows */}
-      <Arrow x1={85} y1={319} x2={75} y2={385} color="#475569" />
-      <Arrow x1={232} y1={319} x2={195} y2={385} color="#475569" />
+      {/* Docker Registry */}
+      <rect x={760} y={18} width={120} height={48} rx={8} fill="#0a1a2e" stroke="#06b6d4" strokeWidth={1.2} />
+      <text x={820} y={38} textAnchor="middle" fill="#67e8f9" fontSize={12} fontWeight={700} fontFamily="monospace">Docker</text>
+      <text x={820} y={54} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">Container Registry</text>
 
-      {/* Title */}
-      <text x={400} y={435} textAnchor="middle" fill="#334155" fontSize={10} fontFamily="monospace">
-        AppDirect — Microservices + Kafka Event-Driven Architecture
-      </text>
+      <line x1={250} y1={42} x2={310} y2={42} stroke="#06b6d4" strokeWidth={1.5} markerEnd="url(#mk-cyan)" />
+      <line x1={470} y1={42} x2={540} y2={42} stroke="#06b6d4" strokeWidth={1} strokeDasharray="3 3" markerEnd="url(#mk-cyan)" />
+      <line x1={690} y1={42} x2={760} y2={42} stroke="#06b6d4" strokeWidth={1} strokeDasharray="3 3" markerEnd="url(#mk-cyan)" />
+
+      {/* ── PRODUCER SERVICES ROW ── */}
+      {[
+        { x: 30,  label: "Billing",      sub: "PayPal · Stripe",   color: "#8b5cf6" },
+        { x: 205, label: "Payment",      sub: "Stripe · Billpay",  color: "#8b5cf6" },
+        { x: 380, label: "Checkout",     sub: "Cart · Orders",     color: "#8b5cf6" },
+        { x: 555, label: "Auth Service", sub: "OAuth2 · JWT",      color: "#ec4899" },
+        { x: 730, label: "User Service", sub: "Profile · Prefs",   color: "#8b5cf6" },
+      ].map(({ x, label, sub, color }) => (
+        <g key={label}>
+          <rect x={x} y={95} width={145} height={52} rx={8} fill="#130f2d" stroke={color} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 6px ${color}33)` }} />
+          <text x={x + 72} y={117} textAnchor="middle" fill="#e2e8f0" fontSize={11} fontWeight={700} fontFamily="monospace">{label}</text>
+          <text x={x + 72} y={133} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">{sub}</text>
+          <text x={x + 72} y={144} textAnchor="middle" fill="#374151" fontSize={8} fontFamily="monospace">Spring Boot · JPA</text>
+        </g>
+      ))}
+
+      {/* LB → Producer Services */}
+      {[102, 277, 452, 627, 802].map((x, i) => (
+        <line key={i} x1={390} y1={66} x2={x} y2={95} stroke="#8b5cf6" strokeWidth={1.2} strokeDasharray="4 3" opacity={0.5} markerEnd="url(#mk-purple)" />
+      ))}
+
+      {/* ── KAFKA CLUSTER ── */}
+      <rect x={50} y={208} width={800} height={95} rx={10} fill="#060f06" stroke="#10b981" strokeWidth={2} style={{ filter: "drop-shadow(0 0 16px #10b98133)" }} />
+
+      {/* Kafka header */}
+      <text x={450} y={230} textAnchor="middle" fill="#10b981" fontSize={14} fontWeight={700} fontFamily="monospace">Apache Kafka Cluster</text>
+      <text x={450} y={246} textAnchor="middle" fill="#374151" fontSize={9} fontFamily="monospace">Partitioned · Replicated · Fault-Tolerant · Horizontally Scalable · Replayable</text>
+
+      {/* Topic pills */}
+      {[
+        { x: 70,  label: "billing-events",      color: "#8b5cf6" },
+        { x: 240, label: "payment-events",      color: "#3b82f6" },
+        { x: 410, label: "checkout-events",     color: "#06b6d4" },
+        { x: 575, label: "notification-events", color: "#f97316" },
+        { x: 738, label: "audit-events",        color: "#10b981" },
+      ].map(({ x, label, color }) => (
+        <g key={label}>
+          <rect x={x} y={255} width={155} height={30} rx={15} fill="rgba(0,0,0,0.4)" stroke={color} strokeWidth={1} />
+          <text x={x + 77} y={275} textAnchor="middle" fill={color} fontSize={9} fontWeight={600} fontFamily="monospace">{label}</text>
+        </g>
+      ))}
+
+      {/* Producers → Kafka */}
+      {[102, 277, 452, 627, 802].map((x, i) => (
+        <line key={i} x1={x} y1={147} x2={[147, 317, 487, 652, 815][i]} y2={208} stroke="#10b981" strokeWidth={1.5} markerEnd="url(#mk-green)" />
+      ))}
+      {/* publish labels */}
+      <text x={90}  y={183} fill="#10b98188" fontSize={8} fontFamily="monospace">publish</text>
+      <text x={600} y={183} fill="#10b98188" fontSize={8} fontFamily="monospace">publish</text>
+
+      {/* ── CONSUMER SERVICES ROW ── */}
+      {[
+        { x: 30,  label: "Billing Consumer",      sub: "DLQ · Retry",      color: "#f97316" },
+        { x: 225, label: "Payment Processor",     sub: "Idempotent",       color: "#f97316" },
+        { x: 420, label: "Notification Worker",   sub: "Email · SMS · Push", color: "#f97316" },
+        { x: 615, label: "Audit Service",         sub: "Compliance · Log", color: "#f97316" },
+      ].map(({ x, label, sub, color }) => (
+        <g key={label}>
+          <rect x={x} y={333} width={165} height={52} rx={8} fill="#1a1000" stroke={color} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 6px ${color}33)` }} />
+          <text x={x + 82} y={355} textAnchor="middle" fill="#fed7aa" fontSize={11} fontWeight={700} fontFamily="monospace">{label}</text>
+          <text x={x + 82} y={370} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="monospace">{sub}</text>
+          <text x={x + 82} y={381} textAnchor="middle" fill="#374151" fontSize={8} fontFamily="monospace">Consumer Group</text>
+        </g>
+      ))}
+
+      {/* Kafka → Consumers */}
+      {[
+        [147, 112], [317, 307], [487, 502], [652, 697],
+      ].map(([kx, cx], i) => (
+        <line key={i} x1={kx} y1={303} x2={cx} y2={333} stroke="#f97316" strokeWidth={1.5} markerEnd="url(#mk-orange)" />
+      ))}
+      <text x={200} y={320} fill="#f9731688" fontSize={8} fontFamily="monospace">consume</text>
+      <text x={580} y={320} fill="#f9731688" fontSize={8} fontFamily="monospace">consume</text>
+
+      {/* ── DATASTORES & OBSERVABILITY ── */}
+      {[
+        { x: 30,  label: "PostgreSQL", sub: "Billing DB",      color: "#3b82f6" },
+        { x: 155, label: "MySQL",      sub: "Payment DB",      color: "#3b82f6" },
+        { x: 280, label: "MongoDB",    sub: "Orders",          color: "#22c55e" },
+        { x: 395, label: "Redis",      sub: "Cache · Session", color: "#ef4444" },
+        { x: 510, label: "Elastic",    sub: "Logs · Search",   color: "#f59e0b" },
+        { x: 630, label: "Prometheus", sub: "Metrics",         color: "#f97316" },
+        { x: 750, label: "Datadog",    sub: "APM · Traces",    color: "#8b5cf6" },
+      ].map(({ x, label, sub, color }) => (
+        <g key={label}>
+          <rect x={x} y={447} width={108} height={44} rx={8} fill="#0a0a1a" stroke={color} strokeWidth={1} />
+          <text x={x + 54} y={466} textAnchor="middle" fill={color} fontSize={10} fontWeight={600} fontFamily="monospace">{label}</text>
+          <text x={x + 54} y={481} textAnchor="middle" fill="#374151" fontSize={8} fontFamily="monospace">{sub}</text>
+        </g>
+      ))}
+
+      {/* Consumers → DBs */}
+      <line x1={112} y1={385} x2={84}  y2={447} stroke="#475569" strokeWidth={1} strokeDasharray="3 3" markerEnd="url(#mk-slate)" />
+      <line x1={307} y1={385} x2={209} y2={447} stroke="#475569" strokeWidth={1} strokeDasharray="3 3" markerEnd="url(#mk-slate)" />
+      <line x1={502} y1={385} x2={450} y2={447} stroke="#475569" strokeWidth={1} strokeDasharray="3 3" markerEnd="url(#mk-slate)" />
+      <line x1={697} y1={385} x2={684} y2={447} stroke="#475569" strokeWidth={1} strokeDasharray="3 3" markerEnd="url(#mk-slate)" />
     </svg>
   );
 }
