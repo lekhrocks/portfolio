@@ -4,13 +4,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import { Mail, ArrowDown, ExternalLink, Zap } from "lucide-react";
-import { GithubIcon, LinkedinIcon } from "@/components/icons";
+import { GithubIcon, LinkedinIcon, LeetcodeIcon } from "@/components/icons";
 
 const stats = [
-  { value: "5+", label: "Years Experience", color: "from-blue-600 to-cyan-500" },
-  { value: "10K+", label: "RPS Optimized", color: "from-purple-600 to-pink-500" },
-  { value: "99.9%", label: "SLA Achieved", color: "from-green-600 to-cyan-500" },
-  { value: "2", label: "Companies", color: "from-orange-500 to-pink-500" },
+  { value: "5+",   label: "Years Experience", color: "from-blue-600 to-cyan-500" },
+  { value: "10K+", label: "RPS Optimized",    color: "from-purple-600 to-pink-500" },
+  { value: "99.9%",label: "SLA Achieved",     color: "from-green-600 to-cyan-500" },
+  { value: "729+", label: "LeetCode Solved",  color: "from-orange-500 to-yellow-400" },
 ];
 
 export default function Hero() {
@@ -199,6 +199,18 @@ export default function Hero() {
             >
               <Mail size={16} />
               Email
+            </motion.a>
+
+            <motion.a
+              href="https://leetcode.com/u/lekh_nith/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 rounded-full glass border border-orange-500/20 text-orange-400 font-medium hover:border-orange-400/50 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <LeetcodeIcon size={16} />
+              LeetCode
             </motion.a>
           </motion.div>
 
