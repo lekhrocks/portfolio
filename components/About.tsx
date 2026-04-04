@@ -1,8 +1,33 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { GraduationCap, MapPin, Building2, Star } from "lucide-react";
+
+function NitLogo() {
+  const [failed, setFailed] = useState(false);
+
+  if (!failed) {
+    return (
+      <img
+        src="https://www.google.com/s2/favicons?domain=nith.ac.in&sz=128"
+        alt="NIT Hamirpur"
+        className="w-7 h-7 object-contain"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
+  // Fallback: NIT emblem-style SVG
+  return (
+    <svg viewBox="0 0 40 40" fill="none" className="w-7 h-7" aria-hidden="true">
+      <rect width="40" height="40" rx="8" fill="#003399" />
+      <text x="20" y="16" textAnchor="middle" fill="white" fontSize="9" fontWeight="800" fontFamily="Arial, sans-serif">NIT</text>
+      <text x="20" y="27" textAnchor="middle" fill="#FFD700" fontSize="6" fontWeight="600" fontFamily="Arial, sans-serif">HAMIRPUR</text>
+      <rect x="6" y="30" width="28" height="1.5" rx="0.75" fill="#FFD700" opacity="0.6" />
+    </svg>
+  );
+}
 
 const stats = [
   { value: "5+",   label: "Years of Experience", sublabel: "2020 – Present" },
@@ -118,8 +143,8 @@ export default function About() {
                   <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 blur-2xl" />
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600/20 to-cyan-500/20 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    <GraduationCap size={18} className="text-blue-400" />
+                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-blue-500/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <NitLogo />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
