@@ -1,11 +1,29 @@
 "use client";
 
 import { useRef, useState } from "react";
+import type React from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ExternalLink, Server, MessageSquare, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
 
-const projects = [
+type Project = {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  color: string;
+  borderColor: string;
+  glowColor: string;
+  accentColor: string;
+  githubUrl: string;
+  tags: string[];
+  highlights: string[];
+  metrics: { label: string; value: string }[];
+  architectureId: string | null;
+};
+
+const projects: Project[] = [
   {
     id: "router",
     title: "Router Service",
@@ -18,6 +36,7 @@ const projects = [
     glowColor: "rgba(59,130,246,0.12)",
     accentColor: "#3b82f6",
     githubUrl: "https://github.com/lekhrocks/router-service",
+    tags: ["Java 21", "Spring Boot 3.5", "Docker", "WebSockets", "Prometheus"],
     highlights: [
       "Regex-based routing rules with Round Robin, Random, and Least Connections load balancing",
       "Resilience patterns: circuit breakers, retries with exponential backoff, token-bucket rate limiting",
@@ -44,6 +63,7 @@ const projects = [
     glowColor: "rgba(139,92,246,0.12)",
     accentColor: "#8b5cf6",
     githubUrl: "https://github.com/lekhrocks/realtime-chat",
+    tags: ["Java 21", "Spring Boot 3.x", "GraphQL", "WebSockets", "AWS S3", "Docker", "Flyway"],
     highlights: [
       "JWT-based authentication, role-based access control (RBAC), and email verification",
       "Real-time messaging via WebSockets; GraphQL API for flexible client queries",
@@ -70,6 +90,7 @@ const projects = [
     glowColor: "rgba(16,185,129,0.12)",
     accentColor: "#10b981",
     githubUrl: "https://github.com/lekhrocks/Ecommerce_BE",
+    tags: ["Java 11", "Spring Boot 2.7", "Spring Data JPA", "MySQL", "Stripe", "Swagger"],
     highlights: [
       "Secure token-based authentication with robust validation and standardized error handling",
       "Product catalog, category management, cart and order workflow APIs",
@@ -87,7 +108,7 @@ const projects = [
 ];
 
 function ProjectCard({ project, index, isInView }: {
-  project: typeof projects[0];
+  project: Project;
   index: number;
   isInView: boolean;
 }) {
