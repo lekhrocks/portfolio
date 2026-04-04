@@ -103,7 +103,7 @@ const projects: Project[] = [
       { label: "DB", value: "MySQL" },
       { label: "Docs", value: "Swagger" },
     ],
-    architectureId: null,
+    architectureId: "ecommerce",
   },
 ];
 
@@ -250,9 +250,10 @@ function ProjectCard({ project, index, isInView }: {
       {project.architectureId && (
         <div className="mt-3 pt-3 border-t border-white/5">
           <button
-            onClick={() =>
-              document.getElementById("architecture")?.scrollIntoView({ behavior: "smooth" })
-            }
+            onClick={() => {
+              const el = document.getElementById("architecture");
+              if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 72, behavior: "smooth" });
+            }}
             className={`flex items-center gap-1.5 text-xs font-medium bg-gradient-to-r ${project.color} bg-clip-text text-transparent hover:opacity-80 transition-opacity`}
           >
             <ExternalLink size={12} style={{ color: project.accentColor }} />

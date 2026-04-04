@@ -40,7 +40,11 @@ export default function Navbar() {
   const handleNavClick = (href: string) => {
     setIsOpen(false);
     const id = href.slice(1);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    const el = document.getElementById(id);
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 72;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
   };
 
   return (
@@ -50,9 +54,10 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "glass shadow-xl shadow-black/30 border-b border-white/5"
+          ? "border-b border-white/5 shadow-xl shadow-black/30"
           : "bg-transparent"
       }`}
+      style={scrolled ? { background: "rgba(5, 5, 16, 0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" } : {}}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">

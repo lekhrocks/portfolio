@@ -1,8 +1,87 @@
 "use client";
 
-import { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { Briefcase, Calendar, MapPin, ChevronRight } from "lucide-react";
+
+const companyLogos: Record<string, React.ReactNode> = {
+  AppDirect: (
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+      <rect width="40" height="40" rx="8" fill="#1B5EE0"/>
+      <path d="M20 8L30 28H10L20 8Z" fill="white" opacity="0.9"/>
+      <rect x="13" y="22" width="14" height="2.5" rx="1.25" fill="#60a5fa" opacity="0.8"/>
+    </svg>
+  ),
+  Infosys: (
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+      <rect width="40" height="40" rx="8" fill="#007CC3"/>
+      <rect x="9"  y="10" width="5" height="5" rx="1" fill="#F48024"/>
+      <rect x="16" y="10" width="5" height="5" rx="1" fill="#00B050"/>
+      <rect x="23" y="10" width="5" height="5" rx="1" fill="#E31E24"/>
+      <rect x="9"  y="17" width="5" height="5" rx="1" fill="#00AEEF"/>
+      <rect x="16" y="17" width="5" height="5" rx="1" fill="#F48024"/>
+      <rect x="23" y="17" width="5" height="5" rx="1" fill="#00B050"/>
+      <text x="20" y="33" textAnchor="middle" fill="white" fontSize="7" fontWeight="700" fontFamily="Arial, sans-serif" letterSpacing="0.5">INFOSYS</text>
+    </svg>
+  ),
+};
+
+type Experience = {
+  company: string;
+  role: string;
+  period: string;
+  location: string;
+  type: string;
+  current: boolean;
+  color: string;
+  borderColor: string;
+  glowColor: string;
+  logo: string;
+  logoUrl: string;
+  highlights: string[];
+  tags: string[];
+};
+
+function CompanyLogo({ exp }: { exp: Experience }) {
+  const [failed, setFailed] = useState(false);
+  const svgFallback = companyLogos[exp.company];
+
+  if (!failed) {
+    return (
+      <div
+        className="hidden sm:flex absolute left-0 top-6 w-12 h-12 rounded-xl items-center justify-center overflow-hidden bg-white shadow-lg"
+        style={{ boxShadow: `0 0 20px ${exp.glowColor}` }}
+      >
+        <img
+          src={exp.logoUrl}
+          alt={`${exp.company} logo`}
+          className="w-9 h-9 object-contain"
+          onError={() => setFailed(true)}
+        />
+      </div>
+    );
+  }
+
+  if (svgFallback) {
+    return (
+      <div
+        className="hidden sm:flex absolute left-0 top-6 w-12 h-12 rounded-xl items-center justify-center overflow-hidden shadow-lg"
+        style={{ boxShadow: `0 0 20px ${exp.glowColor}` }}
+      >
+        {svgFallback}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`hidden sm:flex absolute left-0 top-6 w-12 h-12 rounded-xl bg-gradient-to-br ${exp.color} items-center justify-center text-white font-bold text-sm font-mono shadow-lg`}
+      style={{ boxShadow: `0 0 20px ${exp.glowColor}` }}
+    >
+      {exp.logo}
+    </div>
+  );
+}
 
 const experiences = [
   {
@@ -16,6 +95,7 @@ const experiences = [
     borderColor: "border-blue-500/20",
     glowColor: "rgba(59,130,246,0.15)",
     logo: "AD",
+    logoUrl: "https://www.google.com/s2/favicons?domain=appdirect.com&sz=128",
     highlights: [
       "Designed and owned multiple high-availability microservices for Billing, Checkout, Notifications, and Payments supporting thousands of concurrent requests with p99 latency < 200ms and 99.9%+ availability.",
       "Built integrations with PayPal, Stripe, and Billpay via custom connectors ensuring secure and reliable payment processing.",
@@ -38,6 +118,7 @@ const experiences = [
     borderColor: "border-purple-500/20",
     glowColor: "rgba(139,92,246,0.12)",
     logo: "IN",
+    logoUrl: "https://www.google.com/s2/favicons?domain=infosys.com&sz=128",
     highlights: [
       "Customized and extended core banking modules using Java and JavaScript to meet client-specific regulatory requirements in mission-critical banking systems.",
       "Migrated legacy Finacle scripts to modern Java-based microservices, improving maintainability, testability, and deployment reliability.",
@@ -100,12 +181,7 @@ export default function Experience() {
                 className="relative sm:pl-20"
               >
                 {/* Timeline Dot */}
-                <div
-                  className={`hidden sm:flex absolute left-0 top-6 w-12 h-12 rounded-xl bg-gradient-to-br ${exp.color} items-center justify-center text-white font-bold text-sm font-mono shadow-lg`}
-                  style={{ boxShadow: `0 0 20px ${exp.glowColor}` }}
-                >
-                  {exp.logo}
-                </div>
+                <CompanyLogo exp={exp} />
 
                 {/* Card */}
                 <div

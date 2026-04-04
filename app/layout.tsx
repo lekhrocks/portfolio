@@ -13,11 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lekhraj Kumar — Backend Systems Engineer",
-  description:
-    "Software Engineer with 5+ years building high-throughput distributed systems in payments and SaaS. Expertise in microservices, Kafka, Java, Spring Boot, and system design.",
+  title: "Lekhraj Kumar — Software Engineer",
+    description:
+      "Software Engineer with 5+ years building high-throughput distributed systems in payments and SaaS. Full stack experience with Java, Spring Boot, React, and Kafka-powered microservices.",
   keywords: [
+    "Software Engineer",
     "Backend Engineer",
+    "Full Stack Engineer",
     "Java Developer",
     "Distributed Systems",
     "Microservices",
@@ -29,14 +31,14 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Lekhraj Kumar", url: "https://github.com/lekhrajkumar" }],
   openGraph: {
-    title: "Lekhraj Kumar — Backend Systems Engineer",
+    title: "Lekhraj Kumar — Software Engineer",
     description:
       "Building high-throughput distributed systems at scale. 5+ years in payments, Kafka, microservices, and Java.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lekhraj Kumar — Backend Systems Engineer",
+    title: "Lekhraj Kumar — Software Engineer",
     description: "Building high-throughput distributed systems at scale.",
   },
 };

@@ -206,6 +206,11 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Section scroll offset — accounts for fixed 64px navbar */
+section[id] {
+  scroll-margin-top: 72px;
+}
+
 /* Mobile padding utility */
 .section-padding {
   padding: 6rem 1.5rem;

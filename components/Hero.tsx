@@ -63,7 +63,7 @@ export default function Hero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
               </span>
-              Available for Senior Backend / System Design Roles · Serving Notice Period
+              Available for Software Engineer / Full Stack Roles · Serving Notice Period
             </div>
           </motion.div>
 
@@ -114,13 +114,13 @@ export default function Hero() {
               sequence={[
                 "Software Engineer II @ AppDirect",
                 2000,
-                "Backend Systems Architect",
+                "Backend & Frontend Engineer",
                 2000,
                 "Distributed Systems Expert",
                 2000,
                 "Kafka & Microservices Engineer",
                 2000,
-                "Java / Spring Boot Specialist",
+                "Java · Spring Boot · React",
                 2000,
               ]}
               wrapper="span"
@@ -140,8 +140,9 @@ export default function Hero() {
           >
             Building and scaling{" "}
             <span className="text-blue-400 font-medium">high-throughput distributed systems</span>{" "}
-            in payments and SaaS. Expertise in microservices, event-driven architectures, and
-            production reliability at{" "}
+            in payments and SaaS. Strong backend expertise with hands-on{" "}
+            <span className="text-cyan-400 font-medium">React & UI development</span>{" "}
+            experience. Systems handling{" "}
             <span className="text-cyan-400 font-medium">10K+ RPS</span> with{" "}
             <span className="text-green-400 font-medium">99.9%+ availability</span>.
           </motion.p>
@@ -154,7 +155,10 @@ export default function Hero() {
             className="flex flex-wrap items-center justify-center gap-4 mb-16"
           >
             <motion.button
-              onClick={() => document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => {
+                const el = document.getElementById("projects");
+                if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 72, behavior: "smooth" });
+              }}
               className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium shadow-lg shadow-blue-500/25 hover:opacity-90 transition-opacity"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -229,7 +233,10 @@ export default function Hero() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-600 cursor-pointer"
-        onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
+        onClick={() => {
+          const el = document.getElementById("about");
+          if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 72, behavior: "smooth" });
+        }}
       >
         <span className="text-xs tracking-widest uppercase font-mono">Scroll</span>
         <motion.div

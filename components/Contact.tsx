@@ -143,9 +143,9 @@ export default function Contact() {
                 <span className="text-green-400 text-sm font-semibold">Available for Opportunities</span>
               </div>
               <p className="text-slate-400 text-xs leading-relaxed">
-                Currently serving notice period. Actively looking for senior backend /
-                distributed systems engineering roles. Interested in high-scale systems,
-                payments, or SaaS platforms.
+                Currently serving notice period. Looking for Software Engineer roles with
+                strong backend focus and opportunities to work across the stack — Java,
+                Spring Boot, Kafka, React, and distributed systems.
               </p>
             </div>
 
