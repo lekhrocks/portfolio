@@ -78,47 +78,37 @@ function Globe() {
     groupRef.current.rotation.x += delta * 0.05;
   });
 
-  const arcColors = ["#3b82f6", "#06b6d4", "#8b5cf6"];
+  const arcColors = ["#3b82f6", "#06b6d4"];
 
   return (
     <group ref={groupRef}>
       {/* Main wireframe sphere */}
-      <Sphere args={[radius, 36, 28]}>
-        <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.18} />
+      <Sphere args={[radius, 32, 24]}>
+        <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.12} />
       </Sphere>
 
-      {/* Outer glow shell */}
-      <Sphere args={[radius * 1.05, 32, 24]}>
-        <meshBasicMaterial color="#06b6d4" wireframe transparent opacity={0.06} />
-      </Sphere>
-
-      {/* Inner soft core */}
-      <Sphere args={[radius * 0.5, 24, 16]}>
-        <meshBasicMaterial color="#3b82f6" transparent opacity={0.08} />
-      </Sphere>
-
-      {/* Equator ring — bright, visible */}
-      <Torus args={[radius, 0.008, 16, 64]} rotation={[Math.PI / 2, 0, 0]}>
-        <meshBasicMaterial color="#06b6d4" transparent opacity={0.55} />
+      {/* Equator ring — soft */}
+      <Torus args={[radius, 0.005, 12, 64]} rotation={[Math.PI / 2, 0, 0]}>
+        <meshBasicMaterial color="#06b6d4" transparent opacity={0.25} />
       </Torus>
 
-      {/* Tilted orbital rings (Saturn-like) */}
-      <Ring args={[radius * 1.35, radius * 1.37, 80]} rotation={[Math.PI / 2.3, 0, 0]}>
-        <meshBasicMaterial color="#8b5cf6" transparent opacity={0.4} side={THREE.DoubleSide} />
+      {/* Tilted orbital rings — barely visible structural hint */}
+      <Ring args={[radius * 1.35, radius * 1.36, 80]} rotation={[Math.PI / 2.3, 0, 0]}>
+        <meshBasicMaterial color="#8b5cf6" transparent opacity={0.18} side={THREE.DoubleSide} />
       </Ring>
-      <Ring args={[radius * 1.55, radius * 1.57, 80]} rotation={[Math.PI / 1.8, 0, Math.PI / 6]}>
-        <meshBasicMaterial color="#3b82f6" transparent opacity={0.3} side={THREE.DoubleSide} />
+      <Ring args={[radius * 1.55, radius * 1.56, 80]} rotation={[Math.PI / 1.8, 0, Math.PI / 6]}>
+        <meshBasicMaterial color="#3b82f6" transparent opacity={0.13} side={THREE.DoubleSide} />
       </Ring>
 
-      {/* Connection arcs (curved over surface) */}
+      {/* Connection arcs — much more subtle */}
       {arcs.map((a) => (
         <Line
           key={a.id}
           points={a.pts}
           color={arcColors[a.colorIdx % arcColors.length]}
-          opacity={0.45}
+          opacity={0.18}
           transparent
-          lineWidth={1.2}
+          lineWidth={1}
         />
       ))}
 
@@ -139,7 +129,8 @@ function PulseNode({
 }) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const haloRef = useRef<THREE.Mesh>(null!);
-  const colors = ["#3b82f6", "#06b6d4", "#8b5cf6", "#10b981", "#f97316", "#ec4899"];
+  // Restrained palette — only blues/cyans + occasional accent
+  const colors = ["#3b82f6", "#06b6d4", "#60a5fa", "#22d3ee", "#3b82f6", "#8b5cf6"];
   const color = colors[colorIndex % colors.length];
 
   const offset = useMemo(() => Math.random() * Math.PI * 2, []);
@@ -147,23 +138,23 @@ function PulseNode({
   useFrame((state) => {
     if (!meshRef.current || !haloRef.current) return;
     const t = state.clock.elapsedTime + offset;
-    const pulse = 1 + Math.sin(t * 1.6) * 0.3;
+    const pulse = 1 + Math.sin(t * 1.6) * 0.2;
     meshRef.current.scale.setScalar(pulse);
-    haloRef.current.scale.setScalar(pulse * 1.6);
+    haloRef.current.scale.setScalar(pulse * 1.4);
     (haloRef.current.material as THREE.MeshBasicMaterial).opacity =
-      0.5 - Math.sin(t * 1.6) * 0.25;
+      0.18 - Math.sin(t * 1.6) * 0.08;
   });
 
   return (
     <group position={position}>
-      {/* Halo glow */}
+      {/* Subtle halo */}
       <mesh ref={haloRef}>
-        <sphereGeometry args={[0.12, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.35} toneMapped={false} />
+        <sphereGeometry args={[0.05, 12, 12]} />
+        <meshBasicMaterial color={color} transparent opacity={0.15} toneMapped={false} />
       </mesh>
-      {/* Core dot */}
+      {/* Small core dot */}
       <mesh ref={meshRef}>
-        <sphereGeometry args={[0.075, 16, 16]} />
+        <sphereGeometry args={[0.028, 12, 12]} />
         <meshBasicMaterial color={color} toneMapped={false} />
       </mesh>
     </group>

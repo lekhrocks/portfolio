@@ -49,12 +49,19 @@ export default function Hero() {
         className="absolute inset-0 aurora-bg pointer-events-none"
       />
 
-      {/* 3D Globe — distributed systems visual */}
+      {/* 3D Globe — soft backdrop only */}
       <motion.div
-        style={{ y: orb1Y, opacity: contentOpacity }}
+        style={{
+          y: orb1Y,
+          opacity: contentOpacity,
+          maskImage:
+            "radial-gradient(ellipse 50% 35% at 50% 50%, transparent 30%, black 75%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 50% 35% at 50% 50%, transparent 30%, black 75%)",
+        }}
         className="absolute inset-0 pointer-events-none flex items-center justify-center"
       >
-        <div className="w-[min(90vw,720px)] h-[min(90vw,720px)] opacity-70">
+        <div className="w-[min(95vw,820px)] h-[min(95vw,820px)] opacity-55">
           <HeroGlobe />
         </div>
       </motion.div>
@@ -112,7 +119,7 @@ export default function Hero() {
 
       <motion.div
         style={{ y: contentY, opacity: contentOpacity }}
-        className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-32"
+        className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-32"
       >
         <div className="flex flex-col items-center text-center">
           {/* Availability Badge */}
