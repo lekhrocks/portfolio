@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -8,6 +9,12 @@ import { Mail, ArrowDown, ExternalLink, Zap } from "lucide-react";
 import { GithubIcon, LinkedinIcon, LeetcodeIcon } from "@/components/icons";
 import MagneticButton from "@/components/MagneticButton";
 import AnimatedNumber from "@/components/AnimatedNumber";
+
+// Lazy-load 3D globe (Three.js bundle) — never blocks initial paint
+const HeroGlobe = dynamic(() => import("@/components/HeroGlobe"), {
+  ssr: false,
+  loading: () => null,
+});
 
 const stats = [
   { value: "5+",    label: "Years Experience", color: "from-blue-600 to-cyan-500" },
@@ -41,6 +48,16 @@ export default function Hero() {
         style={{ y: auroraY }}
         className="absolute inset-0 aurora-bg pointer-events-none"
       />
+
+      {/* 3D Globe — distributed systems visual */}
+      <motion.div
+        style={{ y: orb1Y, opacity: contentOpacity }}
+        className="absolute inset-0 pointer-events-none flex items-center justify-center"
+      >
+        <div className="w-[min(90vw,720px)] h-[min(90vw,720px)] opacity-70">
+          <HeroGlobe />
+        </div>
+      </motion.div>
 
       {/* Animated Background Orbs — parallax */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
