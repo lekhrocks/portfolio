@@ -155,15 +155,33 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* Name */}
+          {/* Name with neon halo */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-4 leading-none"
+            className="relative text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-4 leading-none"
           >
-            <span className="text-white">Lekhraj</span>{" "}
-            <span className="gradient-text">Kumar</span>
+            {/* Glowing halo behind text */}
+            <span
+              aria-hidden
+              className="absolute inset-0 blur-3xl opacity-50 pointer-events-none animate-pulse-slow"
+              style={{
+                background:
+                  "linear-gradient(135deg, #3b82f6, #06b6d4 35%, #8b5cf6 70%, #ec4899)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Lekhraj Kumar
+            </span>
+            <span className="relative text-white drop-shadow-[0_0_30px_rgba(59,130,246,0.4)]">
+              Lekhraj
+            </span>{" "}
+            <span className="relative gradient-text-animated drop-shadow-[0_0_30px_rgba(6,182,212,0.5)]">
+              Kumar
+            </span>
           </motion.h1>
 
           {/* Typewriter Role */}

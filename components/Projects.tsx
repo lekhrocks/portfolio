@@ -127,7 +127,9 @@ function ProjectCard({ project, index, isInView }: {
       maxTilt={5}
       scale={1.01}
       glare
-      className={`glass glass-hover rounded-2xl border ${project.borderColor} p-6 relative overflow-hidden group`}
+      className={`glass glass-hover rounded-2xl border ${project.borderColor} p-6 relative overflow-hidden group conic-border ${
+        project.id === "chat" ? "conic-border-purple" : project.id === "ecommerce" ? "conic-border-green" : ""
+      }`}
       style={{ boxShadow: `0 0 40px ${project.glowColor}` }}
     >
       {/* BG Glow */}

@@ -2,13 +2,10 @@
 
 import { useMemo, useRef, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Line, Sphere } from "@react-three/drei";
+import { Float, Line, Sphere, Ring, Torus } from "@react-three/drei";
 import * as THREE from "three";
 
-/* ─────────────────────────────────────────────────────────
-   Generates evenly-distributed points on a sphere via
-   the Fibonacci-sphere algorithm.
-───────────────────────────────────────────────────────── */
+/* Fibonacci-sphere distribution */
 function fibonacciSphere(samples: number, radius: number): THREE.Vector3[] {
   const points: THREE.Vector3[] = [];
   const phi = Math.PI * (3 - Math.sqrt(5));
@@ -27,70 +24,105 @@ function fibonacciSphere(samples: number, radius: number): THREE.Vector3[] {
   return points;
 }
 
-/* ─────────────────────────────────────────────────────────
-   Slowly rotating wireframe globe with glowing nodes
-───────────────────────────────────────────────────────── */
+/* Curved arc between two surface points (great-circle slerp) */
+function arcPoints(a: THREE.Vector3, b: THREE.Vector3, lift = 1.18, segments = 24) {
+  const out: THREE.Vector3[] = [];
+  const start = a.clone().normalize();
+  const end = b.clone().normalize();
+  const omega = start.angleTo(end);
+  const sinO = Math.sin(omega);
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    if (omega === 0) {
+      out.push(start.clone().multiplyScalar(a.length() * lift));
+      continue;
+    }
+    const f0 = Math.sin((1 - t) * omega) / sinO;
+    const f1 = Math.sin(t * omega) / sinO;
+    const dir = start.clone().multiplyScalar(f0).add(end.clone().multiplyScalar(f1));
+    // Lift to a higher arc at midpoint
+    const arcRadius = a.length() * (1 + (lift - 1) * 4 * t * (1 - t));
+    out.push(dir.normalize().multiplyScalar(arcRadius));
+  }
+  return out;
+}
+
 function Globe() {
   const groupRef = useRef<THREE.Group>(null!);
-  const radius = 1.6;
+  const radius = 1.7;
 
-  const nodes = useMemo(() => fibonacciSphere(28, radius), []);
+  const nodes = useMemo(() => fibonacciSphere(34, radius), []);
 
-  // Pre-compute connection pairs (each node connects to its 2 nearest neighbors)
-  const connections = useMemo(() => {
-    const pairs: Array<{ from: THREE.Vector3; to: THREE.Vector3; id: string }> = [];
+  // Generate 3 nearest-neighbor connections for each node
+  const arcs = useMemo(() => {
+    const out: Array<{ pts: THREE.Vector3[]; id: string; colorIdx: number }> = [];
     nodes.forEach((node, i) => {
       const sorted = nodes
         .map((n, j) => ({ n, j, dist: node.distanceTo(n) }))
         .filter(({ j }) => j !== i)
         .sort((a, b) => a.dist - b.dist)
-        .slice(0, 2);
+        .slice(0, 3);
       sorted.forEach(({ n, j }) => {
         const id = i < j ? `${i}-${j}` : `${j}-${i}`;
-        if (!pairs.find((p) => p.id === id)) {
-          pairs.push({ from: node, to: n, id });
+        if (!out.find((x) => x.id === id)) {
+          out.push({ pts: arcPoints(node, n), id, colorIdx: i + j });
         }
       });
     });
-    return pairs;
+    return out;
   }, [nodes]);
 
   useFrame((_state, delta) => {
     if (!groupRef.current) return;
-    groupRef.current.rotation.y += delta * 0.12;
-    groupRef.current.rotation.x += delta * 0.04;
+    groupRef.current.rotation.y += delta * 0.15;
+    groupRef.current.rotation.x += delta * 0.05;
   });
+
+  const arcColors = ["#3b82f6", "#06b6d4", "#8b5cf6"];
 
   return (
     <group ref={groupRef}>
-      {/* Wireframe sphere — Earth/network feel */}
-      <Sphere args={[radius, 32, 24]}>
-        <meshBasicMaterial
-          color="#3b82f6"
-          wireframe
-          transparent
-          opacity={0.12}
-        />
+      {/* Main wireframe sphere */}
+      <Sphere args={[radius, 36, 28]}>
+        <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.18} />
       </Sphere>
 
-      {/* Inner glowing core */}
-      <Sphere args={[radius * 0.55, 24, 16]}>
-        <meshBasicMaterial color="#06b6d4" transparent opacity={0.04} />
+      {/* Outer glow shell */}
+      <Sphere args={[radius * 1.05, 32, 24]}>
+        <meshBasicMaterial color="#06b6d4" wireframe transparent opacity={0.06} />
       </Sphere>
 
-      {/* Connection lines between nodes */}
-      {connections.map((c) => (
+      {/* Inner soft core */}
+      <Sphere args={[radius * 0.5, 24, 16]}>
+        <meshBasicMaterial color="#3b82f6" transparent opacity={0.08} />
+      </Sphere>
+
+      {/* Equator ring — bright, visible */}
+      <Torus args={[radius, 0.008, 16, 64]} rotation={[Math.PI / 2, 0, 0]}>
+        <meshBasicMaterial color="#06b6d4" transparent opacity={0.55} />
+      </Torus>
+
+      {/* Tilted orbital rings (Saturn-like) */}
+      <Ring args={[radius * 1.35, radius * 1.37, 80]} rotation={[Math.PI / 2.3, 0, 0]}>
+        <meshBasicMaterial color="#8b5cf6" transparent opacity={0.4} side={THREE.DoubleSide} />
+      </Ring>
+      <Ring args={[radius * 1.55, radius * 1.57, 80]} rotation={[Math.PI / 1.8, 0, Math.PI / 6]}>
+        <meshBasicMaterial color="#3b82f6" transparent opacity={0.3} side={THREE.DoubleSide} />
+      </Ring>
+
+      {/* Connection arcs (curved over surface) */}
+      {arcs.map((a) => (
         <Line
-          key={c.id}
-          points={[c.from, c.to]}
-          color="#3b82f6"
-          opacity={0.25}
+          key={a.id}
+          points={a.pts}
+          color={arcColors[a.colorIdx % arcColors.length]}
+          opacity={0.45}
           transparent
-          lineWidth={1}
+          lineWidth={1.2}
         />
       ))}
 
-      {/* Service nodes — glowing dots */}
+      {/* Service nodes — bigger, brighter, with halo */}
       {nodes.map((p, i) => (
         <PulseNode key={i} position={p} colorIndex={i} />
       ))}
@@ -106,37 +138,45 @@ function PulseNode({
   colorIndex: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null!);
-  const colors = ["#3b82f6", "#06b6d4", "#8b5cf6", "#10b981", "#f97316"];
+  const haloRef = useRef<THREE.Mesh>(null!);
+  const colors = ["#3b82f6", "#06b6d4", "#8b5cf6", "#10b981", "#f97316", "#ec4899"];
   const color = colors[colorIndex % colors.length];
 
-  // Pulse phase offset per node so they don't all blink together
   const offset = useMemo(() => Math.random() * Math.PI * 2, []);
 
   useFrame((state) => {
-    if (!meshRef.current) return;
+    if (!meshRef.current || !haloRef.current) return;
     const t = state.clock.elapsedTime + offset;
-    const pulse = 1 + Math.sin(t * 1.5) * 0.25;
+    const pulse = 1 + Math.sin(t * 1.6) * 0.3;
     meshRef.current.scale.setScalar(pulse);
+    haloRef.current.scale.setScalar(pulse * 1.6);
+    (haloRef.current.material as THREE.MeshBasicMaterial).opacity =
+      0.5 - Math.sin(t * 1.6) * 0.25;
   });
 
   return (
-    <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[0.05, 12, 12]} />
-      <meshBasicMaterial color={color} toneMapped={false} />
-    </mesh>
+    <group position={position}>
+      {/* Halo glow */}
+      <mesh ref={haloRef}>
+        <sphereGeometry args={[0.12, 16, 16]} />
+        <meshBasicMaterial color={color} transparent opacity={0.35} toneMapped={false} />
+      </mesh>
+      {/* Core dot */}
+      <mesh ref={meshRef}>
+        <sphereGeometry args={[0.075, 16, 16]} />
+        <meshBasicMaterial color={color} toneMapped={false} />
+      </mesh>
+    </group>
   );
 }
 
-/* ─────────────────────────────────────────────────────────
-   Floating particles around the globe — atmosphere effect
-───────────────────────────────────────────────────────── */
-function Particles({ count = 200 }: { count?: number }) {
+function Particles({ count = 280 }: { count?: number }) {
   const ref = useRef<THREE.Points>(null!);
 
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const r = 2.5 + Math.random() * 1.8;
+      const r = 2.6 + Math.random() * 2;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
@@ -148,8 +188,8 @@ function Particles({ count = 200 }: { count?: number }) {
 
   useFrame((_, delta) => {
     if (!ref.current) return;
-    ref.current.rotation.y += delta * 0.02;
-    ref.current.rotation.x += delta * 0.01;
+    ref.current.rotation.y += delta * 0.025;
+    ref.current.rotation.x += delta * 0.012;
   });
 
   return (
@@ -163,22 +203,19 @@ function Particles({ count = 200 }: { count?: number }) {
       </bufferGeometry>
       <pointsMaterial
         color="#94a3b8"
-        size={0.018}
+        size={0.022}
         sizeAttenuation
         transparent
-        opacity={0.5}
+        opacity={0.6}
       />
     </points>
   );
 }
 
-/* ─────────────────────────────────────────────────────────
-   Main exported component
-───────────────────────────────────────────────────────── */
 export default function HeroGlobe() {
   return (
     <Canvas
-      camera={{ position: [0, 0, 5.2], fov: 45 }}
+      camera={{ position: [0, 0, 5], fov: 45 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
       style={{ background: "transparent" }}

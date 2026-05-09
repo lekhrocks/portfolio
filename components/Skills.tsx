@@ -2,72 +2,134 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import {
+  Code2,
+  Server,
+  Network,
+  Send,
+  Database,
+  Cloud,
+  LineChart,
+  CheckCircle2,
+} from "lucide-react";
 import TiltCard from "@/components/TiltCard";
+
+/* Devicon brand-icon helper (CDN, no install needed) */
+function brandIcon(name: string) {
+  return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${name}/${name}-original.svg`;
+}
 
 const skillCategories = [
   {
     title: "Languages",
-    icon: "⚡",
+    Icon: Code2,
     color: "from-yellow-500 to-orange-500",
     borderColor: "border-yellow-500/20",
     pillColor: "bg-yellow-500/10 border-yellow-500/20 text-yellow-300",
-    skills: ["Java (Primary)", "Golang", "JavaScript"],
+    skills: [
+      { name: "Java (Primary)", icon: brandIcon("java/java") },
+      { name: "Golang",          icon: brandIcon("go/go") },
+      { name: "JavaScript",      icon: brandIcon("javascript/javascript") },
+    ],
   },
   {
     title: "Backend Frameworks",
-    icon: "🔧",
+    Icon: Server,
     color: "from-blue-500 to-cyan-500",
     borderColor: "border-blue-500/20",
     pillColor: "bg-blue-500/10 border-blue-500/20 text-blue-300",
-    skills: ["Spring Boot", "Spring Security", "Hibernate/JPA", "RESTful APIs", "GraphQL", "WebSockets", "OAuth2"],
+    skills: [
+      { name: "Spring Boot",     icon: brandIcon("spring/spring") },
+      { name: "Spring Security", icon: brandIcon("spring/spring") },
+      { name: "Hibernate/JPA",   icon: brandIcon("hibernate/hibernate") },
+      { name: "RESTful APIs",    icon: null },
+      { name: "GraphQL",         icon: brandIcon("graphql/graphql") },
+      { name: "WebSockets",      icon: null },
+      { name: "OAuth2",          icon: null },
+    ],
   },
   {
     title: "Architecture",
-    icon: "🏗️",
+    Icon: Network,
     color: "from-purple-500 to-violet-500",
     borderColor: "border-purple-500/20",
     pillColor: "bg-purple-500/10 border-purple-500/20 text-purple-300",
-    skills: ["Microservices", "Event-Driven Architecture", "Domain-Driven Design", "System Design (HLD/LLD)", "SaaS Platforms"],
+    skills: [
+      { name: "Microservices",            icon: null },
+      { name: "Event-Driven Architecture", icon: null },
+      { name: "Domain-Driven Design",     icon: null },
+      { name: "System Design (HLD/LLD)",  icon: null },
+      { name: "SaaS Platforms",           icon: null },
+    ],
   },
   {
     title: "Messaging & Streaming",
-    icon: "📨",
+    Icon: Send,
     color: "from-pink-500 to-rose-500",
     borderColor: "border-pink-500/20",
     pillColor: "bg-pink-500/10 border-pink-500/20 text-pink-300",
-    skills: ["Apache Kafka", "RabbitMQ"],
+    skills: [
+      { name: "Apache Kafka", icon: brandIcon("apachekafka/apachekafka") },
+      { name: "RabbitMQ",     icon: brandIcon("rabbitmq/rabbitmq") },
+    ],
   },
   {
     title: "Databases & Caching",
-    icon: "🗄️",
+    Icon: Database,
     color: "from-green-500 to-emerald-500",
     borderColor: "border-green-500/20",
     pillColor: "bg-green-500/10 border-green-500/20 text-green-300",
-    skills: ["MySQL", "PostgreSQL", "MongoDB", "Redis"],
+    skills: [
+      { name: "MySQL",      icon: brandIcon("mysql/mysql") },
+      { name: "PostgreSQL", icon: brandIcon("postgresql/postgresql") },
+      { name: "MongoDB",    icon: brandIcon("mongodb/mongodb") },
+      { name: "Redis",      icon: brandIcon("redis/redis") },
+    ],
   },
   {
     title: "Cloud, DevOps & Infrastructure",
-    icon: "☁️",
+    Icon: Cloud,
     color: "from-cyan-500 to-sky-500",
     borderColor: "border-cyan-500/20",
     pillColor: "bg-cyan-500/10 border-cyan-500/20 text-cyan-300",
-    skills: ["Docker", "Kubernetes", "Helm", "GitHub Actions", "Jenkins", "AWS (S3, API Gateway)"],
+    skills: [
+      { name: "Docker",         icon: brandIcon("docker/docker") },
+      { name: "Kubernetes",     icon: brandIcon("kubernetes/kubernetes") },
+      { name: "Helm",           icon: brandIcon("helm/helm") },
+      { name: "GitHub Actions", icon: brandIcon("github/github") },
+      { name: "Jenkins",        icon: brandIcon("jenkins/jenkins") },
+      { name: "AWS",            icon: brandIcon("amazonwebservices/amazonwebservices-plain-wordmark") },
+    ],
   },
   {
     title: "Observability & Reliability",
-    icon: "📊",
+    Icon: LineChart,
     color: "from-indigo-500 to-blue-500",
     borderColor: "border-indigo-500/20",
     pillColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-300",
-    skills: ["Prometheus", "Datadog APM", "Elasticsearch", "Logstash", "Spring Actuator", "Centralized Logging"],
+    skills: [
+      { name: "Prometheus",       icon: brandIcon("prometheus/prometheus") },
+      { name: "Datadog APM",      icon: null },
+      { name: "Elasticsearch",    icon: brandIcon("elasticsearch/elasticsearch") },
+      { name: "Logstash",         icon: null },
+      { name: "Spring Actuator",  icon: brandIcon("spring/spring") },
+      { name: "Centralized Logging", icon: null },
+    ],
   },
   {
     title: "Testing & Quality",
-    icon: "✅",
+    Icon: CheckCircle2,
     color: "from-teal-500 to-green-500",
     borderColor: "border-teal-500/20",
     pillColor: "bg-teal-500/10 border-teal-500/20 text-teal-300",
-    skills: ["JUnit", "Mockito", "Integration Testing", "Contract Testing", "TDD", "CI/CD Pipelines"],
+    skills: [
+      { name: "JUnit",                icon: null },
+      { name: "Mockito",              icon: null },
+      { name: "Integration Testing",  icon: null },
+      { name: "Contract Testing",     icon: null },
+      { name: "TDD",                  icon: null },
+      { name: "CI/CD Pipelines",      icon: null },
+    ],
   },
 ];
 
@@ -129,7 +191,11 @@ export default function Skills() {
                 />
 
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-lg">{category.icon}</span>
+                  <div
+                    className={`w-7 h-7 rounded-lg bg-gradient-to-br ${category.color} bg-opacity-15 flex items-center justify-center shadow-md`}
+                  >
+                    <category.Icon size={14} className="text-white" />
+                  </div>
                   <h3
                     className={`text-xs font-semibold uppercase tracking-wider bg-gradient-to-r ${category.color} bg-clip-text text-transparent`}
                   >
@@ -140,10 +206,18 @@ export default function Skills() {
                 <div className="flex flex-wrap gap-1.5">
                   {category.skills.map((skill) => (
                     <span
-                      key={skill}
-                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${category.pillColor} transition-all duration-200 hover:scale-105`}
+                      key={skill.name}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${category.pillColor} transition-all duration-200 hover:scale-105`}
                     >
-                      {skill}
+                      {skill.icon && (
+                        <img
+                          src={skill.icon}
+                          alt=""
+                          className="w-3.5 h-3.5 object-contain"
+                          loading="lazy"
+                        />
+                      )}
+                      {skill.name}
                     </span>
                   ))}
                 </div>
