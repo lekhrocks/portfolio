@@ -1,67 +1,102 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Mail, Code2, Heart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Mail } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/icons";
+
+type Health = {
+  status: string;
+  region: string;
+  runtime: string;
+  uptime_ms: number;
+  version: string;
+  timestamp: string;
+};
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [h, setH] = useState<Health | null>(null);
+
+  useEffect(() => {
+    let cancel = false;
+    fetch("/api/health", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: Health) => !cancel && setH(d))
+      .catch(() => {});
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  const region = h?.region && h.region !== "local" ? h.region : "ap-south-1";
+  const version = (h?.version ?? "dev").slice(0, 7);
 
   return (
-    <footer className="border-t border-white/5 py-10 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          {/* Brand */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center gap-2"
-          >
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center">
-              <Code2 size={12} className="text-white" />
+    <footer className="mt-12">
+      {/* Mid block — brand + socials */}
+      <div className="border-t border-[var(--panel-border)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-md bg-[var(--accent)] text-black font-mono font-bold text-[12px] flex items-center justify-center">
+              LK
             </div>
-            <span className="font-mono font-bold gradient-text">Lekhraj Kumar</span>
-          </motion.div>
-
-          {/* Copyright */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-slate-600 text-xs flex items-center gap-1"
-          >
-            © {year} · Built with{" "}
-            <Heart size={10} className="text-red-500 fill-red-500 inline mx-0.5" />
-            using Next.js · Deployed on Vercel
-          </motion.p>
-
-          {/* Social Links */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center gap-3"
-          >
+            <div className="leading-tight">
+              <div className="text-xs font-mono text-white">lekhrajkumar</div>
+              <div className="mono-tag text-[var(--text-chrome)] text-[10px]">
+                © {year} Lekhraj Kumar · built with Next.js · deployed on Vercel
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
             {[
               { icon: GithubIcon, href: "https://github.com/lekhrocks", label: "GitHub" },
               { icon: LinkedinIcon, href: "https://linkedin.com/in/lekhrajkumar", label: "LinkedIn" },
               { icon: Mail, href: "mailto:lekh.nith@gmail.com", label: "Email" },
             ].map(({ icon: Icon, href, label }) => (
-              <motion.a
+              <a
                 key={label}
                 href={href}
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="w-8 h-8 rounded-lg glass border border-white/8 flex items-center justify-center text-slate-500 hover:text-white hover:border-blue-500/30 transition-all"
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.9 }}
+                className="w-8 h-8 rounded-md border border-[var(--panel-border)] flex items-center justify-center text-slate-400 hover:text-white hover:border-[var(--panel-border-hover)] transition-colors"
               >
-                <Icon size={14} />
-              </motion.a>
+                <Icon size={13} />
+              </a>
             ))}
-          </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Status bar — terminal style */}
+      <div className="status-bar">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+          <span className="flex items-center gap-1.5">
+            <span
+              className="dot dot-pulse"
+              style={{
+                width: 6,
+                height: 6,
+                background: h ? "var(--status-ok)" : "var(--text-chrome)",
+              }}
+            />
+            <span className="text-slate-300">
+              {h ? "200 OK" : "checking…"}
+            </span>
+          </span>
+          <span>region={region}</span>
+          <span>runtime={h?.runtime ?? "edge"}</span>
+          <span>v={version}</span>
+          <span className="ml-auto hidden sm:inline">
+            <a
+              href="/api/health"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="console-link"
+            >
+              GET /api/health
+            </a>
+          </span>
         </div>
       </div>
     </footer>

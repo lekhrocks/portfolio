@@ -14,12 +14,13 @@ export default function CustomCursor() {
   const sy = useSpring(y, { stiffness: 500, damping: 30, mass: 0.4 });
 
   useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
-    ) {
-      return;
-    }
+    if (typeof window === "undefined") return;
+
+    // Respect users on touch devices and those who prefer reduced motion.
+    const supportsHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!supportsHover || reducedMotion) return;
+
     setEnabled(true);
     document.documentElement.classList.add("custom-cursor");
 

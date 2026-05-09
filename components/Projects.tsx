@@ -1,319 +1,205 @@
 "use client";
 
-import { useRef, useState } from "react";
-import type React from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import { ExternalLink, Server, MessageSquare, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ArrowUpRight,
+  ScrollText,
+  Server,
+  MessageSquare,
+  ShoppingCart,
+} from "lucide-react";
 import { GithubIcon } from "@/components/icons";
-import TiltCard from "@/components/TiltCard";
+import SectionHeader from "@/components/console/SectionHeader";
+import StatusPill from "@/components/console/StatusPill";
+import { getCaseStudyByProjectId } from "@/lib/case-studies";
 
-type Project = {
+type Service = {
   id: string;
   title: string;
   subtitle: string;
   description: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  color: string;
-  borderColor: string;
-  glowColor: string;
-  accentColor: string;
+  status: "ok" | "info" | "muted";
+  statusLabel: string;
   githubUrl: string;
   tags: string[];
-  highlights: string[];
   metrics: { label: string; value: string }[];
-  architectureId: string | null;
 };
 
-const projects: Project[] = [
+const services: Service[] = [
   {
     id: "router",
-    title: "Router Service",
-    subtitle: "High-Performance Request Router / Load Balancer",
+    title: "router-service",
+    subtitle: "High-Performance request router & load balancer",
     description:
-      "Enterprise-grade request router inspired by API gateways, focusing on low-latency routing, fault tolerance, and horizontal scalability. Validated performance at 10K+ RPS and 1M+ requests under stress.",
+      "Java 21 + Spring Boot router with regex routing, three balancing strategies, hand-rolled circuit breaker, token-bucket rate limiter, and live WebSocket telemetry. Validated at 10K+ RPS, p99 < 20 ms, ~210 MB resident.",
     icon: Server,
-    color: "from-blue-500 to-cyan-400",
-    borderColor: "border-blue-500/20",
-    glowColor: "rgba(59,130,246,0.12)",
-    accentColor: "#3b82f6",
+    status: "ok",
+    statusLabel: "stable",
     githubUrl: "https://github.com/lekhrocks/router-service",
-    tags: ["Java 21", "Spring Boot 3.5", "Docker", "WebSockets", "Prometheus"],
-    highlights: [
-      "Regex-based routing rules with Round Robin, Random, and Least Connections load balancing",
-      "Resilience patterns: circuit breakers, retries with exponential backoff, token-bucket rate limiting",
-      "Real-time metrics streaming via WebSockets with live traffic monitoring dashboard",
-      "Full observability: Spring Actuator, Prometheus metrics, centralized logging",
-      "JVM optimized with multi-stage Docker builds; validated at 10K+ RPS and 1M+ requests",
-    ],
+    tags: ["Java 21", "Spring Boot 3.5", "Docker", "Prometheus", "WebSockets"],
     metrics: [
-      { label: "Max RPS", value: "10K+" },
-      { label: "Latency", value: "<5ms" },
-      { label: "Stress Test", value: "1M+ req" },
+      { label: "sustained", value: "10K+ RPS" },
+      { label: "p99",        value: "<20ms" },
+      { label: "memory",     value: "210MB" },
     ],
-    architectureId: "router",
   },
   {
     id: "chat",
-    title: "Real-Time Chat & File-Sharing",
-    subtitle: "Production-Ready Backend with WebSockets + AWS S3",
+    title: "realtime-chat",
+    subtitle: "WebSocket chat backend with Kafka audit pipeline",
     description:
-      "Scalable, secure real-time chat and file-sharing backend with JWT authentication, RBAC, antivirus scanning, persistent notifications, and full observability stack.",
+      "Production-shaped real-time chat with JWT/RBAC, S3-backed file sharing with antivirus scanning, transactional Kafka outbox for audit, and per-conversation ordering. Sync delivery and async fan-out fail independently.",
     icon: MessageSquare,
-    color: "from-purple-500 to-pink-400",
-    borderColor: "border-purple-500/20",
-    glowColor: "rgba(139,92,246,0.12)",
-    accentColor: "#8b5cf6",
+    status: "ok",
+    statusLabel: "stable",
     githubUrl: "https://github.com/lekhrocks/realtime-chat",
-    tags: ["Java 21", "Spring Boot 3.x", "GraphQL", "WebSockets", "AWS S3", "Docker", "Flyway"],
-    highlights: [
-      "JWT-based authentication, role-based access control (RBAC), and email verification",
-      "Real-time messaging via WebSockets; GraphQL API for flexible client queries",
-      "S3-backed file management with antivirus scanning, admin dashboard",
-      "Persistent notifications, user preferences, Prometheus observability",
-      "Automated DB migrations with Flyway and full CI/CD pipelines",
-    ],
+    tags: ["Java 21", "Spring Boot", "GraphQL", "Kafka", "WebSockets", "AWS S3"],
     metrics: [
-      { label: "Auth", value: "JWT+RBAC" },
-      { label: "Storage", value: "AWS S3" },
-      { label: "API", value: "GraphQL" },
+      { label: "ack p99",    value: "<80ms" },
+      { label: "audit lag",  value: "<2s p95" },
+      { label: "ordering",   value: "per-conv" },
     ],
-    architectureId: "chat",
   },
   {
     id: "ecommerce",
-    title: "E-Commerce Backend",
-    subtitle: "Production-Ready RESTful Platform with Stripe Payments",
+    title: "ecommerce-backend",
+    subtitle: "RESTful e-commerce backend with Stripe payments",
     description:
-      "Full-featured e-commerce backend with user authentication, product/category management, cart/order workflows, and Stripe payment integration. Clean layered architecture with Swagger docs.",
+      "Layered Spring Boot service for users, catalog, carts, and orders with Stripe payments, robust validation, standardised error handling, and full Swagger docs. Pragmatic foundation for an e-commerce MVP.",
     icon: ShoppingCart,
-    color: "from-green-500 to-emerald-400",
-    borderColor: "border-green-500/20",
-    glowColor: "rgba(16,185,129,0.12)",
-    accentColor: "#10b981",
+    status: "info",
+    statusLabel: "active",
     githubUrl: "https://github.com/lekhrocks/Ecommerce_BE",
-    tags: ["Java 11", "Spring Boot 2.7", "Spring Data JPA", "MySQL", "Stripe", "Swagger"],
-    highlights: [
-      "Secure token-based authentication with robust validation and standardized error handling",
-      "Product catalog, category management, cart and order workflow APIs",
-      "Stripe-based payment processing integration",
-      "Layered architecture (Controller–Service–Repository) with clean separation of concerns",
-      "Comprehensive API documentation with Swagger",
-    ],
+    tags: ["Java 11", "Spring Boot 2.7", "JPA", "MySQL", "Stripe", "Swagger"],
     metrics: [
-      { label: "Payment", value: "Stripe" },
-      { label: "DB", value: "MySQL" },
-      { label: "Docs", value: "Swagger" },
+      { label: "payment", value: "Stripe" },
+      { label: "schema",  value: "MySQL" },
+      { label: "docs",    value: "Swagger" },
     ],
-    architectureId: "ecommerce",
   },
 ];
 
-function ProjectCard({ project, index, isInView }: {
-  project: Project;
-  index: number;
-  isInView: boolean;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const Icon = project.icon;
+function ServiceCard({ s, index }: { s: Service; index: number }) {
+  const Icon = s.icon;
+  const cs = getCaseStudyByProjectId(s.id);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: 0.15 + index * 0.15 }}
-      style={{ perspective: 1500 }}
+    <motion.article
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.35, delay: index * 0.06 }}
+      className="panel panel-interactive p-5 flex flex-col"
     >
-    <TiltCard
-      maxTilt={5}
-      scale={1.01}
-      glare
-      className={`glass glass-hover rounded-2xl border ${project.borderColor} p-6 relative overflow-hidden group conic-border ${
-        project.id === "chat" ? "conic-border-purple" : project.id === "ecommerce" ? "conic-border-green" : ""
-      }`}
-      style={{ boxShadow: `0 0 40px ${project.glowColor}` }}
-    >
-      {/* BG Glow */}
-      <div
-        className={`absolute -top-10 -right-10 w-48 h-48 bg-gradient-to-br ${project.color} opacity-5 blur-3xl group-hover:opacity-10 transition-opacity pointer-events-none`}
-      />
-
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start gap-3">
-          <div
-            className={`w-10 h-10 rounded-xl bg-gradient-to-br ${project.color} flex items-center justify-center flex-shrink-0 shadow-lg`}
-            style={{ boxShadow: `0 0 15px ${project.glowColor}` }}
-          >
-            <Icon size={18} className="text-white" />
-          </div>
-          <div>
-            <h3
-              className={`font-bold text-base bg-gradient-to-r ${project.color} bg-clip-text text-transparent`}
-            >
-              {project.title}
+      {/* Header row */}
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-9 h-9 rounded-md border border-[var(--panel-border)] bg-[var(--bg-primary)] flex items-center justify-center flex-shrink-0">
+          <Icon size={15} className="text-[var(--accent)]" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-mono text-sm font-medium text-white truncate">
+              {s.title}
             </h3>
-            <p className="text-slate-500 text-xs mt-0.5">{project.subtitle}</p>
+            <StatusPill tone={s.status}>{s.statusLabel}</StatusPill>
           </div>
+          <p className="text-[11px] text-slate-500 mt-0.5 truncate">{s.subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <motion.a
-            href={project.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1.5 rounded-lg glass border border-white/8 text-slate-400 hover:text-white transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <GithubIcon size={15} />
-          </motion.a>
-          <motion.a
-            href={project.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1.5 rounded-lg glass border border-white/8 text-slate-400 hover:text-white transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <ExternalLink size={15} />
-          </motion.a>
-        </div>
+        <a
+          href={s.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${s.title} on GitHub`}
+          className="text-slate-500 hover:text-white transition-colors flex-shrink-0"
+        >
+          <GithubIcon size={14} />
+        </a>
       </div>
 
       {/* Description */}
-      <p className="text-slate-400 text-sm leading-relaxed mb-4">{project.description}</p>
+      <p className="text-xs text-slate-400 leading-relaxed mb-4">{s.description}</p>
 
-      {/* Metrics Row */}
-      <div className="flex gap-3 mb-4">
-        {project.metrics.map((m) => (
-          <div
-            key={m.label}
-            className="flex-1 glass rounded-xl p-2.5 text-center border border-white/5"
-          >
-            <div
-              className={`text-sm font-bold font-mono bg-gradient-to-r ${project.color} bg-clip-text text-transparent`}
-            >
-              {m.value}
-            </div>
-            <div className="text-slate-600 text-xs mt-0.5">{m.label}</div>
+      {/* Metrics row */}
+      <div className="grid grid-cols-3 gap-px bg-[var(--panel-border)] border border-[var(--panel-border)] rounded-md overflow-hidden mb-4">
+        {s.metrics.map((m) => (
+          <div key={m.label} className="bg-[var(--panel-bg)] px-2 py-2">
+            <div className="mono-label text-[9px] mb-0.5 truncate">{m.label}</div>
+            <div className="text-[13px] font-mono text-white truncate">{m.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Expandable Highlights */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.ul
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="space-y-1.5 mb-4 overflow-hidden"
-          >
-            {project.highlights.map((h, j) => (
-              <motion.li
-                key={j}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: j * 0.05 }}
-                className="flex items-start gap-2 text-slate-400 text-xs"
-              >
-                <span
-                  className="mt-1.5 w-1 h-1 rounded-full flex-shrink-0"
-                  style={{ background: project.accentColor }}
-                />
-                {h}
-              </motion.li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
-
-      {/* Expand Button */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors mb-4"
-      >
-        {expanded ? (
-          <>
-            <ChevronUp size={13} /> Less details
-          </>
-        ) : (
-          <>
-            <ChevronDown size={13} /> More details
-          </>
-        )}
-      </button>
-
       {/* Tags */}
-      <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/5">
-        {project.tags.map((tag) => (
+      <div className="flex flex-wrap gap-1 mb-4">
+        {s.tags.map((t) => (
           <span
-            key={tag}
-            className="px-2 py-0.5 rounded-full text-xs font-mono glass border border-white/8 text-slate-400"
+            key={t}
+            className="mono-tag px-1.5 py-0.5 rounded border border-[var(--panel-border)] text-slate-400"
           >
-            {tag}
+            {t}
           </span>
         ))}
       </div>
 
-      {/* Architecture Link */}
-      {project.architectureId && (
-        <div className="mt-3 pt-3 border-t border-white/5">
-          <button
-            onClick={() => {
-              const el = document.getElementById("architecture");
-              if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 72, behavior: "smooth" });
-            }}
-            className={`flex items-center gap-1.5 text-xs font-medium bg-gradient-to-r ${project.color} bg-clip-text text-transparent hover:opacity-80 transition-opacity`}
+      {/* Footer actions */}
+      <div className="mt-auto pt-3 panel-divider flex flex-wrap gap-x-4 gap-y-2 text-xs">
+        {cs && (
+          <Link
+            href={`/case-studies/${cs.slug}`}
+            className="inline-flex items-center gap-1 console-link font-medium"
           >
-            <ExternalLink size={12} style={{ color: project.accentColor }} />
-            View System Architecture Diagram →
-          </button>
-        </div>
-      )}
-    </TiltCard>
-    </motion.div>
+            <ScrollText size={11} /> Read case study
+          </Link>
+        )}
+        <a
+          href="#architecture"
+          onClick={(e) => {
+            e.preventDefault();
+            const el = document.getElementById("architecture");
+            if (el) {
+              window.scrollTo({
+                top: el.getBoundingClientRect().top + window.scrollY - 72,
+                behavior: "smooth",
+              });
+            }
+          }}
+          className="inline-flex items-center gap-1 text-slate-400 hover:text-slate-200"
+        >
+          <ArrowUpRight size={11} /> Topology
+        </a>
+        <a
+          href={s.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-slate-400 hover:text-slate-200 ml-auto"
+        >
+          <GithubIcon size={11} /> Source
+        </a>
+      </div>
+    </motion.article>
   );
 }
 
 export default function Projects() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
-
   return (
-    <section id="projects" className="section-padding">
-      <div className="max-w-6xl mx-auto" ref={ref}>
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-blue-500/20 text-blue-400 text-xs font-mono mb-4"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            04 / Projects
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="section-title text-white mb-4"
-          >
-            Featured Projects
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-slate-400 max-w-xl mx-auto"
-          >
-            Production-grade systems built with performance and reliability as first principles
-          </motion.p>
-        </div>
+    <section id="projects" className="section-padding scroll-mt-20">
+      <div className="max-w-6xl mx-auto">
+        <SectionHeader
+          id="04.services"
+          title="Owned services"
+          subtitle="Production-grade systems built with performance and reliability as first principles. Each card is a service this engineer designed and shipped end-to-end."
+          meta={
+            <span className="mono-tag text-[var(--text-chrome)]">
+              {services.length} services · all healthy
+            </span>
+          }
+        />
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project, i) => (
-            <ProjectCard key={project.id} project={project} index={i} isInView={isInView} />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {services.map((s, i) => (
+            <ServiceCard key={s.id} s={s} index={i} />
           ))}
         </div>
       </div>

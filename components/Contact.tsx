@@ -1,90 +1,82 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
-import { Mail, MapPin, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
-import { GithubIcon, LinkedinIcon } from "@/components/icons";
+import { motion } from "framer-motion";
+import {
+  Mail,
+  MapPin,
+  Send,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import emailjs from "@emailjs/browser";
+import { GithubIcon, LinkedinIcon } from "@/components/icons";
+import SectionHeader from "@/components/console/SectionHeader";
+import StatusPill from "@/components/console/StatusPill";
 
-const socials = [
+const CHANNELS = [
   {
     icon: Mail,
-    label: "Email",
+    label: "email",
     value: "lekh.nith@gmail.com",
     href: "mailto:lekh.nith@gmail.com",
-    color: "text-blue-400",
-    bgColor: "bg-blue-500/10",
-    borderColor: "border-blue-500/20",
+    sla: "≤ 24h",
   },
   {
     icon: GithubIcon,
-    label: "GitHub",
+    label: "github",
     value: "github.com/lekhrocks",
     href: "https://github.com/lekhrocks",
-    color: "text-slate-300",
-    bgColor: "bg-white/5",
-    borderColor: "border-white/10",
+    sla: "best-effort",
   },
   {
     icon: LinkedinIcon,
-    label: "LinkedIn",
+    label: "linkedin",
     value: "linkedin.com/in/lekhrajkumar",
     href: "https://linkedin.com/in/lekhrajkumar",
-    color: "text-cyan-400",
-    bgColor: "bg-cyan-500/10",
-    borderColor: "border-cyan-500/20",
+    sla: "≤ 48h",
   },
   {
     icon: MapPin,
-    label: "Location",
-    value: "Pune, Maharashtra, India",
-    href: null,
-    color: "text-green-400",
-    bgColor: "bg-green-500/10",
-    borderColor: "border-green-500/20",
+    label: "location",
+    value: "Pune, IN · UTC+5:30",
+    href: null as string | null,
+    sla: "biz hours",
   },
 ];
 
 type FormState = "idle" | "sending" | "success" | "error";
 
 export default function Contact() {
-  const ref = useRef(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
   const [formState, setFormState] = useState<FormState>("idle");
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormState("sending");
-
     const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
     const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
-
     try {
       await emailjs.sendForm(
         serviceId,
         process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
         formRef.current!,
-        publicKey
+        publicKey,
       );
-
       await emailjs.send(
         serviceId,
         process.env.NEXT_PUBLIC_EMAILJS_AUTO_REPLY_TEMPLATE_ID!,
-        {
-          name: form.name,
-          email: form.email,
-          subject: form.subject,
-          message: form.message,
-        },
-        publicKey
+        { ...form },
+        publicKey,
       );
-
       setFormState("success");
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
@@ -93,220 +85,208 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="section-padding">
-      <div className="max-w-5xl mx-auto" ref={ref}>
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-blue-500/20 text-blue-400 text-xs font-mono mb-4"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            06 / Contact
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="section-title text-white mb-4"
-          >
-            Get In Touch
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-slate-400 max-w-xl mx-auto"
-          >
-            Open to senior backend engineering roles, system design discussions, or interesting
-            technical collaborations.
-          </motion.p>
-        </div>
+    <section id="contact" className="section-padding scroll-mt-20">
+      <div className="max-w-5xl mx-auto">
+        <SectionHeader
+          id="07.on-call"
+          title="Page on-call"
+          subtitle="Open to senior backend roles, system design discussions, or interesting technical collaborations. The on-call engineer is currently me."
+          meta={
+            <StatusPill tone="ok" pulse>
+              accepting pages
+            </StatusPill>
+          }
+        />
 
-        <div className="grid lg:grid-cols-5 gap-8">
-          {/* Left — Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="lg:col-span-2 space-y-4"
-          >
-            {/* Availability Banner */}
-            <div className="glass rounded-2xl p-5 border border-green-500/20 bg-gradient-to-br from-green-950/30 to-cyan-950/10">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative rounded-full h-2.5 w-2.5 bg-green-400" />
-                </span>
-                <span className="text-green-400 text-sm font-semibold">Available for Opportunities</span>
-              </div>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                Currently serving notice period. Looking for Software Engineer roles with
-                strong backend focus and opportunities to work across the stack — Java,
-                Spring Boot, Kafka, React, and distributed systems.
+        <div className="grid lg:grid-cols-5 gap-3">
+          {/* ── Channels ── */}
+          <div className="lg:col-span-2 space-y-3">
+            {/* Availability banner */}
+            <div className="panel p-5">
+              <div className="mono-label mb-2">availability</div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Currently serving notice. Looking for{" "}
+                <span className="text-white">Senior / Staff backend</span> roles —
+                Java, Spring Boot, Kafka, React, distributed systems. Open to remote
+                or Pune / Bengaluru.
               </p>
             </div>
 
-            {/* Social Links */}
-            <div className="space-y-3">
-              {socials.map(({ icon: Icon, label, value, href, color, bgColor, borderColor }, i) => (
-                <motion.div
-                  key={label}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ delay: 0.3 + i * 0.08 }}
-                >
-                  {href ? (
-                    <a
-                      href={href}
-                      target={href.startsWith("http") ? "_blank" : undefined}
-                      rel="noopener noreferrer"
-                      className={`flex items-center gap-3 p-3.5 rounded-xl glass glass-hover border ${borderColor} transition-all group`}
-                    >
-                      <div className={`w-8 h-8 rounded-lg ${bgColor} border ${borderColor} flex items-center justify-center flex-shrink-0`}>
-                        <Icon size={15} className={color} />
+            {/* Channel rows */}
+            <div className="panel overflow-hidden">
+              <div className="px-4 py-3 panel-divider border-t-0 flex items-center justify-between">
+                <span className="mono-label">channels</span>
+                <span className="mono-tag text-[var(--text-chrome)]">
+                  {CHANNELS.length} routes
+                </span>
+              </div>
+              <ul>
+                {CHANNELS.map(({ icon: Icon, label, value, href, sla }, i) => {
+                  const inner = (
+                    <div className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--panel-bg-hover)] transition-colors">
+                      <Icon size={13} className="text-[var(--accent)] flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <div className="mono-label">{label}</div>
+                        <div className="text-xs text-slate-300 truncate">{value}</div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-xs text-slate-500 font-medium">{label}</div>
-                        <div className="text-slate-300 text-xs truncate group-hover:text-white transition-colors">
-                          {value}
-                        </div>
-                      </div>
-                    </a>
-                  ) : (
-                    <div className={`flex items-center gap-3 p-3.5 rounded-xl glass border ${borderColor}`}>
-                      <div className={`w-8 h-8 rounded-lg ${bgColor} border ${borderColor} flex items-center justify-center flex-shrink-0`}>
-                        <Icon size={15} className={color} />
-                      </div>
-                      <div>
-                        <div className="text-xs text-slate-500 font-medium">{label}</div>
-                        <div className="text-slate-300 text-xs">{value}</div>
-                      </div>
+                      <span className="mono-tag text-[var(--text-chrome)] shrink-0">
+                        {sla}
+                      </span>
                     </div>
-                  )}
-                </motion.div>
-              ))}
+                  );
+                  return (
+                    <li key={label} className={i > 0 ? "panel-divider" : ""}>
+                      {href ? (
+                        <a
+                          href={href}
+                          target={href.startsWith("http") ? "_blank" : undefined}
+                          rel="noopener noreferrer"
+                        >
+                          {inner}
+                        </a>
+                      ) : (
+                        inner
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Right — Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="lg:col-span-3"
-          >
-            <div className="glass rounded-2xl border border-white/8 p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-500/10 to-purple-500/5 blur-3xl pointer-events-none" />
+          {/* ── Form panel ── */}
+          <div className="lg:col-span-3">
+            <div className="panel overflow-hidden">
+              <div className="px-5 py-3 panel-divider border-t-0 flex items-center justify-between">
+                <span className="mono-label">POST /api/page</span>
+                <span className="mono-tag text-[var(--text-chrome)]">
+                  encrypted in transit
+                </span>
+              </div>
 
               {formState === "success" ? (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-12 gap-4 text-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="p-10 text-center flex flex-col items-center gap-3"
                 >
-                  <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-                    <CheckCircle size={32} className="text-green-400" />
-                  </div>
-                  <h3 className="text-white font-semibold text-lg">Message Sent!</h3>
-                  <p className="text-slate-400 text-sm max-w-xs">
-                    Thanks for reaching out. I&apos;ll get back to you within 24 hours.
+                  <CheckCircle size={28} className="text-green-400" />
+                  <h3 className="text-white font-medium">202 Accepted</h3>
+                  <p className="text-xs text-slate-400 max-w-xs">
+                    Page received. I&apos;ll respond within 24 hours.
                   </p>
                   <button
                     onClick={() => setFormState("idle")}
-                    className="px-5 py-2 rounded-full text-sm glass border border-white/10 text-slate-300 hover:text-white transition-colors"
+                    className="mt-2 px-3 py-1.5 rounded-md text-xs border border-[var(--panel-border)] text-slate-300 hover:text-white hover:border-[var(--panel-border-hover)] transition-colors"
                   >
-                    Send Another
+                    Send another
                   </button>
                 </motion.div>
               ) : (
-                <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {[
-                      { name: "name", label: "Name", type: "text", placeholder: "Your name" },
-                      { name: "email", label: "Email", type: "email", placeholder: "your@email.com" },
-                    ].map((field) => (
-                      <div key={field.name}>
-                        <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                          {field.label}
-                        </label>
-                        <input
-                          type={field.type}
-                          name={field.name}
-                          value={form[field.name as keyof typeof form]}
-                          onChange={handleChange}
-                          required
-                          placeholder={field.placeholder}
-                          className="w-full px-3.5 py-2.5 rounded-xl glass border border-white/8 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 transition-all"
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                      Subject
-                    </label>
-                    <input
+                <form ref={formRef} onSubmit={handleSubmit} className="p-5 space-y-4">
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <Field
+                      name="name"
+                      label="name"
                       type="text"
-                      name="subject"
-                      value={form.subject}
+                      placeholder="your name"
+                      value={form.name}
                       onChange={handleChange}
-                      required
-                      placeholder="Job opportunity / Technical discussion / Collaboration"
-                      className="w-full px-3.5 py-2.5 rounded-xl glass border border-white/8 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 transition-all"
+                    />
+                    <Field
+                      name="email"
+                      label="email"
+                      type="email"
+                      placeholder="you@company.com"
+                      value={form.email}
+                      onChange={handleChange}
                     />
                   </div>
-
+                  <Field
+                    name="subject"
+                    label="subject"
+                    type="text"
+                    placeholder="job opportunity / technical discussion"
+                    value={form.subject}
+                    onChange={handleChange}
+                  />
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                      Message
-                    </label>
+                    <label className="mono-label block mb-1.5">message</label>
                     <textarea
                       name="message"
                       value={form.message}
                       onChange={handleChange}
                       required
                       rows={5}
-                      placeholder="Tell me about the role, project, or opportunity..."
-                      className="w-full px-3.5 py-2.5 rounded-xl glass border border-white/8 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 transition-all resize-none"
+                      placeholder="Tell me about the role, the system, the team…"
+                      className="w-full px-3 py-2.5 rounded-md bg-[var(--bg-primary)] border border-[var(--panel-border)] text-sm text-white placeholder:text-[var(--text-chrome)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-all resize-none font-mono"
                     />
                   </div>
 
                   {formState === "error" && (
-                    <div className="flex items-center gap-2 text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
-                      <AlertCircle size={13} />
-                      Failed to send. Please try emailing me directly at lekh.nith@gmail.com
+                    <div className="flex items-center gap-2 text-red-400 text-xs border border-red-500/20 bg-red-500/5 rounded-md px-3 py-2">
+                      <AlertCircle size={12} />
+                      Failed to send. Email me directly at lekh.nith@gmail.com
                     </div>
                   )}
 
-                  <motion.button
+                  <button
                     type="submit"
                     disabled={formState === "sending"}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium text-sm shadow-lg shadow-blue-500/20 hover:opacity-90 transition-opacity disabled:opacity-60"
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md bg-[var(--accent)] text-black font-medium text-sm hover:bg-[#67e8f9] transition-colors disabled:opacity-60"
                   >
                     {formState === "sending" ? (
                       <>
-                        <Loader2 size={15} className="animate-spin" />
-                        Sending...
+                        <Loader2 size={13} className="animate-spin" />
+                        Sending…
                       </>
                     ) : (
                       <>
-                        <Send size={15} />
-                        Send Message
+                        <Send size={13} />
+                        Send page
                       </>
                     )}
-                  </motion.button>
+                  </button>
                 </form>
               )}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function Field({
+  name,
+  label,
+  type,
+  placeholder,
+  value,
+  onChange,
+}: {
+  name: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={name} className="mono-label block mb-1.5">
+        {label}
+      </label>
+      <input
+        id={name}
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        required
+        placeholder={placeholder}
+        className="w-full px-3 py-2.5 rounded-md bg-[var(--bg-primary)] border border-[var(--panel-border)] text-sm text-white placeholder:text-[var(--text-chrome)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-all font-mono"
+      />
+    </div>
   );
 }

@@ -1,15 +1,38 @@
 @import "tailwindcss";
 
+/* =============================================================
+ * Design language: developer console / observability surface.
+ * Single accent (cyan), dim-slate chrome, monospace labels for
+ * everything that is "chrome" (status, ids, regions, tags).
+ * Inspired by Datadog service detail pages and the Linear UI.
+ * ============================================================= */
 :root {
-  --bg-primary: #050510;
-  --bg-secondary: #0a0a1a;
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-bg-hover: rgba(255, 255, 255, 0.07);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-hover: rgba(99, 179, 237, 0.3);
-  --text-primary: #f0f4ff;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --bg-primary: #0a0e14;
+  --bg-secondary: #0f141b;
+  --panel-bg: #11161e;
+  --panel-bg-hover: #151b25;
+  --panel-border: #1f2937;
+  --panel-border-hover: #334155;
+
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --text-chrome: #475569;
+
+  --accent: #22d3ee;          /* cyan-400  — single signature accent */
+  --accent-soft: #155e75;     /* cyan-800 */
+  --accent-glow: rgba(34, 211, 238, 0.15);
+
+  --status-ok: #22c55e;
+  --status-warn: #f59e0b;
+  --status-err: #ef4444;
+
+  /* Backwards-compat shims for legacy components & case-study page */
+  --bg: var(--bg-primary);
+  --glass-bg: rgba(255, 255, 255, 0.025);
+  --glass-bg-hover: rgba(255, 255, 255, 0.045);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-border-hover: rgba(34, 211, 238, 0.25);
   --accent-blue: #3b82f6;
   --accent-cyan: #06b6d4;
   --accent-purple: #8b5cf6;
@@ -35,6 +58,60 @@ body {
   overflow-x: hidden;
 }
 
+/* Honor user's reduced-motion preference — short, fast, predictable. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus across the site (WCAG 2.4.7). */
+:focus-visible {
+  outline: 2px solid #06b6d4;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Long-form prose for case-study pages (no typography plugin needed). */
+.case-prose {
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.case-prose p {
+  margin: 0.85rem 0;
+}
+.case-prose strong,
+.case-prose b {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+.case-prose code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.85em;
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.1);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+.case-prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(34, 211, 238, 0.4);
+}
+.case-prose a:hover {
+  color: #67e8f9;
+  text-decoration-color: var(--accent);
+}
+
 .glass {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
@@ -50,6 +127,120 @@ body {
   background: var(--glass-bg-hover);
   border-color: var(--glass-border-hover);
   box-shadow: 0 0 30px rgba(59, 130, 246, 0.08);
+}
+
+/* ===== Console design language primitives ===== */
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.panel-flat {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+}
+.panel-interactive {
+  cursor: pointer;
+}
+.panel-interactive:hover {
+  background: var(--panel-bg-hover);
+  border-color: var(--panel-border-hover);
+}
+.panel-divider {
+  border-top: 1px solid var(--panel-border);
+}
+.mono-label {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-chrome);
+}
+.mono-tag {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+.kbd {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--text-secondary);
+}
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+.dot-pulse {
+  position: relative;
+}
+.dot-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  opacity: 0.6;
+  animation: dot-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes dot-ping {
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+.status-bar {
+  background: #06090e;
+  border-top: 1px solid var(--panel-border);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--text-chrome);
+}
+.console-link {
+  color: var(--accent);
+  transition: color 0.15s ease;
+}
+.console-link:hover {
+  color: #67e8f9;
+}
+/* Subtle dotted background for the hero / overview */
+.bg-dot-grid {
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: 0 0;
+}
+
+/* Diagram flow animation — marching dashed line for primary flow */
+@keyframes flow-march {
+  to { stroke-dashoffset: -20; }
+}
+.flow-march {
+  animation: flow-march 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow-march { animation: none !important; }
+}
+
+/* Diagram shape hover affordance — brighten stroke + slight glow.
+   Keeps fill stable so the inner text stays readable. */
+.diagram-shape rect,
+.diagram-shape path,
+.diagram-shape ellipse {
+  transition: filter 0.18s ease, stroke-width 0.18s ease;
+}
+.diagram-shape:hover rect,
+.diagram-shape:hover path,
+.diagram-shape:hover ellipse {
+  filter: brightness(1.35) drop-shadow(0 0 6px rgba(34, 211, 238, 0.35));
+}
+.diagram-shape:hover {
+  outline: none;
 }
 
 .gradient-text {
