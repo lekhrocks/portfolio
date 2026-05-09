@@ -5,6 +5,7 @@ import type React from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ExternalLink, Server, MessageSquare, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
+import TiltCard from "@/components/TiltCard";
 
 type Project = {
   id: string;
@@ -120,6 +121,12 @@ function ProjectCard({ project, index, isInView }: {
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: 0.15 + index * 0.15 }}
+      style={{ perspective: 1500 }}
+    >
+    <TiltCard
+      maxTilt={5}
+      scale={1.01}
+      glare
       className={`glass glass-hover rounded-2xl border ${project.borderColor} p-6 relative overflow-hidden group`}
       style={{ boxShadow: `0 0 40px ${project.glowColor}` }}
     >
@@ -261,6 +268,7 @@ function ProjectCard({ project, index, isInView }: {
           </button>
         </div>
       )}
+    </TiltCard>
     </motion.div>
   );
 }

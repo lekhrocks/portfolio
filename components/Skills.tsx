@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import TiltCard from "@/components/TiltCard";
 
 const skillCategories = [
   {
@@ -107,41 +108,46 @@ export default function Skills() {
         </div>
 
         {/* Skills Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div
+          className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+          style={{ perspective: 1500 }}
+        >
           {skillCategories.map((category, i) => (
             <motion.div
               key={category.title}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.1 + i * 0.06 }}
-              className={`glass glass-hover rounded-2xl p-5 border ${category.borderColor} group relative overflow-hidden`}
             >
-              {/* Background gradient glow */}
-              <div
-                className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${category.color} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity`}
-              />
+              <TiltCard
+                maxTilt={8}
+                scale={1.03}
+                className={`glass glass-hover rounded-2xl p-5 border ${category.borderColor} group relative overflow-hidden h-full shadow-3d`}
+              >
+                <div
+                  className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${category.color} opacity-10 blur-2xl group-hover:opacity-30 transition-opacity`}
+                />
 
-              {/* Header */}
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-lg">{category.icon}</span>
-                <h3
-                  className={`text-xs font-semibold uppercase tracking-wider bg-gradient-to-r ${category.color} bg-clip-text text-transparent`}
-                >
-                  {category.title}
-                </h3>
-              </div>
-
-              {/* Pills */}
-              <div className="flex flex-wrap gap-1.5">
-                {category.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${category.pillColor} transition-all duration-200 hover:scale-105`}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-lg">{category.icon}</span>
+                  <h3
+                    className={`text-xs font-semibold uppercase tracking-wider bg-gradient-to-r ${category.color} bg-clip-text text-transparent`}
                   >
-                    {skill}
-                  </span>
-                ))}
-              </div>
+                    {category.title}
+                  </h3>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {category.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${category.pillColor} transition-all duration-200 hover:scale-105`}
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </TiltCard>
             </motion.div>
           ))}
         </div>

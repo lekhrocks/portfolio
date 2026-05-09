@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { GraduationCap, MapPin, Building2, Star } from "lucide-react";
+import AnimatedNumber from "@/components/AnimatedNumber";
+import TiltCard from "@/components/TiltCard";
 
 function NitLogo() {
   const [failed, setFailed] = useState(false);
@@ -166,20 +168,25 @@ export default function About() {
             </div>
 
             {/* Right — Stats */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4" style={{ perspective: 1200 }}>
               {stats.map((stat, i) => (
                 <motion.div
                   key={stat.label}
                   initial={{ opacity: 0, y: 30, scale: 0.9 }}
                   animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
                   transition={{ duration: 0.5, delay: 0.3 + i * 0.1, type: "spring" }}
-                  className="glass glass-hover rounded-2xl p-6 border border-white/5 text-center group"
                 >
-                  <div className="text-3xl font-bold font-mono gradient-text mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-white text-sm font-medium mb-1">{stat.label}</div>
-                  <div className="text-slate-500 text-xs">{stat.sublabel}</div>
+                  <TiltCard
+                    maxTilt={10}
+                    scale={1.04}
+                    className="glass glass-hover rounded-2xl p-6 border border-white/5 text-center group shadow-3d"
+                  >
+                    <div className="text-3xl font-bold font-mono gradient-text mb-1">
+                      <AnimatedNumber value={stat.value} duration={2} />
+                    </div>
+                    <div className="text-white text-sm font-medium mb-1">{stat.label}</div>
+                    <div className="text-slate-500 text-xs">{stat.sublabel}</div>
+                  </TiltCard>
                 </motion.div>
               ))}
 

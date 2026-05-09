@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { Briefcase, Calendar, MapPin, ChevronRight } from "lucide-react";
+import TiltCard from "@/components/TiltCard";
 
 const companyLogos: Record<string, React.ReactNode> = {
   AppDirect: (
@@ -184,7 +185,11 @@ export default function Experience() {
                 <CompanyLogo exp={exp} />
 
                 {/* Card */}
-                <div
+                <div style={{ perspective: 1500 }}>
+                <TiltCard
+                  maxTilt={4}
+                  scale={1.005}
+                  glare
                   className={`glass glass-hover rounded-2xl border ${exp.borderColor} p-6 relative overflow-hidden`}
                   style={{ boxShadow: `0 0 40px ${exp.glowColor}` }}
                 >
@@ -258,6 +263,7 @@ export default function Experience() {
                       </span>
                     ))}
                   </div>
+                </TiltCard>
                 </div>
               </motion.div>
             ))}
