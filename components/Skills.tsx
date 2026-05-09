@@ -96,9 +96,9 @@ const skillCategories = [
       { name: "Docker",         icon: brandIcon("docker/docker") },
       { name: "Kubernetes",     icon: brandIcon("kubernetes/kubernetes") },
       { name: "Helm",           icon: brandIcon("helm/helm") },
-      { name: "GitHub Actions", icon: brandIcon("github/github") },
+      { name: "GitHub Actions", icon: brandIcon("githubactions/githubactions") },
       { name: "Jenkins",        icon: brandIcon("jenkins/jenkins") },
-      { name: "AWS",            icon: brandIcon("amazonwebservices/amazonwebservices-plain-wordmark") },
+      { name: "AWS",            icon: brandIcon("amazonwebservices/amazonwebservices-original-wordmark") },
     ],
   },
   {
@@ -123,12 +123,12 @@ const skillCategories = [
     borderColor: "border-teal-500/20",
     pillColor: "bg-teal-500/10 border-teal-500/20 text-teal-300",
     skills: [
-      { name: "JUnit",                icon: null },
+      { name: "JUnit",                icon: brandIcon("junit/junit") },
       { name: "Mockito",              icon: null },
       { name: "Integration Testing",  icon: null },
       { name: "Contract Testing",     icon: null },
       { name: "TDD",                  icon: null },
-      { name: "CI/CD Pipelines",      icon: null },
+      { name: "CI/CD Pipelines",      icon: brandIcon("githubactions/githubactions") },
     ],
   },
 ];
@@ -204,22 +204,29 @@ export default function Skills() {
                 </div>
 
                 <div className="flex flex-wrap gap-1.5">
-                  {category.skills.map((skill) => (
-                    <span
-                      key={skill.name}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${category.pillColor} transition-all duration-200 hover:scale-105`}
-                    >
-                      {skill.icon && (
-                        <img
-                          src={skill.icon}
-                          alt=""
-                          className="w-3.5 h-3.5 object-contain"
-                          loading="lazy"
-                        />
-                      )}
-                      {skill.name}
-                    </span>
-                  ))}
+                  {category.skills.map((skill) => {
+                    const FallbackIcon = category.Icon;
+                    return (
+                      <span
+                        key={skill.name}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${category.pillColor} transition-all duration-200 hover:scale-105`}
+                      >
+                        <span className="w-3.5 h-3.5 flex items-center justify-center flex-shrink-0">
+                          {skill.icon ? (
+                            <img
+                              src={skill.icon}
+                              alt=""
+                              className="w-full h-full object-contain"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <FallbackIcon size={11} className="opacity-80" />
+                          )}
+                        </span>
+                        {skill.name}
+                      </span>
+                    );
+                  })}
                 </div>
               </TiltCard>
             </motion.div>
