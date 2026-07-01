@@ -19,12 +19,32 @@ type Deployment = {
 
 const deployments: Deployment[] = [
   {
+    hash: "f1a9e03",
+    company: "CP Axtra",
+    role: "Senior Software Engineer",
+    period: "Jun 2026 — Present",
+    location: "Remote",
+    current: true,
+    logoUrl: "https://www.google.com/s2/favicons?domain=cpaxtra.com&sz=128",
+    highlights: [
+      "Developing backend microservices for a payment-related invoice processing system using Java 21, Spring Boot 3.5, Spring WebFlux, and PostgreSQL.",
+      "Built event-driven Kafka consumers handling multiple event types with header-based routing, DLQ fan-out, and structured error recovery.",
+      "Implemented distributed ShedLock batch schedulers for timed invoice submission workflows, with partial-failure handling and audit logging.",
+      "Designed dual-chain Spring Security: static Bearer-token auth for internal service-to-service calls and Keycloak OAuth2 JWT for external consumers.",
+      "Built a Testcontainers-based integration testing framework with a reusable base class (real PostgreSQL, WebTestClient, FK-safe teardown) — raising the JaCoCo instruction coverage gate to 75%.",
+      "Modernised Gradle build: Boot BOM as platform(), separate unit/integration test tasks, Allure 2.39 + JaCoCo Cobertura wired into GitLab CI.",
+      "Integrated Tencent Cloud COS for cloud object storage and built external API clients for downstream services using Spring WebClient.",
+      "Collaborating with product, QA, and cross-functional teams to deliver payment-related backend features.",
+    ],
+    tags: ["Java 21", "Spring Boot 3.5", "WebFlux", "Kafka", "PostgreSQL", "Testcontainers", "ShedLock", "Keycloak", "Tencent Cloud", "GitLab CI", "Docker"],
+  },
+  {
     hash: "a8f3c12",
     company: "AppDirect",
     role: "Software Development Engineer II",
-    period: "Sep 2022 — Present",
+    period: "Sep 2022 — Jun 2026",
     location: "Pune, IN",
-    current: true,
+    current: false,
     logoUrl: "https://www.google.com/s2/favicons?domain=appdirect.com&sz=128",
     highlights: [
       "Designed and own multiple high-availability microservices for Billing, Checkout, Notifications, and Payments — supporting thousands of concurrent requests with p99 < 200ms and 99.9%+ availability.",
@@ -58,6 +78,7 @@ const deployments: Deployment[] = [
 
 function CompanyAvatar({ d }: { d: Deployment }) {
   const [failed, setFailed] = useState(false);
+
   if (!failed) {
     return (
       <img

@@ -8,6 +8,7 @@ import { Legend } from "@/components/diagrams/primitives";
 import RouterDiagram, { type DiagramMode } from "@/components/diagrams/RouterDiagram";
 import KafkaDiagram from "@/components/diagrams/KafkaDiagram";
 import EcommerceDiagram from "@/components/diagrams/EcommerceDiagram";
+import InterviewTrackerDiagram from "@/components/diagrams/InterviewTrackerDiagram";
 
 type DiagramDef = {
   id: string;
@@ -66,6 +67,22 @@ const diagrams: DiagramDef[] = [
         "Authenticated checkout trace. REST validates the bearer JWT against Auth Service (<1ms, cached) before routing. Order Service then blocks on Stripe authorisation (~250ms) — only on success does it persist via JPA → MySQL. A declined card never leaves a phantom row in the database.",
     },
     Component: EcommerceDiagram,
+  },
+  {
+    id: "interview-tracker",
+    title: "Interview Tracker",
+    subtitle: "Spring Boot 4 · Next.js 14 · PostgreSQL · Redis · Groq LLM · DLQ",
+    tags: ["Spring Boot 4", "Java 25", "Modulith", "PostgreSQL", "Redis", "Groq LLM", "DLQ"],
+    modes: ["topology", "sequence", "failure"],
+    captions: {
+      topology:
+        "Full-stack architecture: Next.js 14 frontend with SSR hydration, Spring Boot 4 REST API with 9 Spring Modulith domain modules (iam, applications, profile, notifications, billing, analytics, logos, bootstrap, coach). Security is layered — JWT signature → Redis jti blacklist → users.token_version. Persistence is PostgreSQL (optional read-replica via DB_READER_URL) + Redis 7+. Async side-effects go through a transactional outbox with exponential backoff and a dead-letter queue. External dependencies: Groq LLM (Resilience4j circuit breakers), Lemon Squeezy billing (HMAC-verified webhooks), ntfy push, Google Calendar OAuth, Grafana Cloud OTLP telemetry, Postmark email-to-app webhook.",
+      sequence:
+        "End-to-end authenticated request trace: Browser → CDN → Next.js SSR (serverApi.ts forwards cookies) → Spring Boot 4 filter chain (CorrelationIdFilter → RateLimitingFilter → JWT auth: sig → Redis blacklist → tokenVersion) → ApplicationController → ApplicationService (@Transactional) → JPA/Hibernate → PostgreSQL INSERT. On commit: ApplicationChanged event → @CacheEvict on Redis analytics cache → OutboxWorker drains → NotificationFanoutDispatcher POSTs to ntfy.sh. The whole trace is correlated via W3C traceparent from the browser's Faro RUM to the backend OTLP spans.",
+      failure:
+        "Three independent failure modes. (1) Groq LLM down: Resilience4j circuit breaker opens after 3/5 failures in 30s window — CvTailorService soft-falls to untailored content, JD analysis returns a degraded score, core CRUD is unaffected. No cascading failures. (2) Outbox write transient failure: exponential backoff 30s→1h max, 6 attempts, then DLQ (FAILED status). Failed rows persist as forensic evidence for manual replay. Grafana alert on outbox_attempts_total{outcome=dead_lettered}. (3) Redis down: RateLimitingFilter degrades to allow-all (no false 429s). JWT blacklist lookup fails open — token version check on the DB row (cached 30s in userDetails) is the surviving guard. Auth stays working, only rate limiting degrades.",
+    },
+    Component: InterviewTrackerDiagram,
   },
 ];
 

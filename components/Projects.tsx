@@ -8,6 +8,8 @@ import {
   Server,
   MessageSquare,
   ShoppingCart,
+  BriefcaseBusiness,
+  LayoutDashboard,
 } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
 import SectionHeader from "@/components/console/SectionHeader";
@@ -77,6 +79,46 @@ const services: Service[] = [
       { label: "payment", value: "Stripe" },
       { label: "schema",  value: "MySQL" },
       { label: "docs",    value: "Swagger" },
+    ],
+  },
+  {
+    id: "interview-tracker-api",
+    title: "interview-tracker-api",
+    subtitle: "Full-featured job-search backend — Spring Boot 4 / Java 25",
+    description:
+      "Production-grade REST API for tracking job applications, interviews, notes, and reminders. Spring Boot 4, Java 25, Spring Modulith, Redis caching, Flyway migrations (41 versions), AI CV tailoring via Groq, WebAuthn passkeys, TOTP 2FA, Pro tier billing with Lemon Squeezy webhooks, and full OpenAPI codegen for the companion Next.js frontend.",
+    icon: BriefcaseBusiness,
+    status: "ok",
+    statusLabel: "stable",
+    githubUrl: "https://github.com/lekhrocks/interview-tracker-backend",
+    tags: [
+      "Java 25", "Spring Boot 4", "Spring Modulith", "PostgreSQL",
+      "Redis", "Flyway", "Spring AI", "WebAuthn", "JWT", "Docker",
+    ],
+    metrics: [
+      { label: "migrations", value: "41 versions" },
+      { label: "modules",    value: "9 domain" },
+      { label: "coverage",   value: "≥55% lines" },
+    ],
+  },
+  {
+    id: "interview-tracker-ui",
+    title: "interview-tracker-ui",
+    subtitle: "Next.js 14 App Router frontend with SSR, React Query, and Pro paywall",
+    description:
+      "Full-stack companion frontend for the interview-tracker API. App Router with server-side prefetch + HydrationBoundary, drag-and-drop Kanban, recharts analytics, AI JD analysis, cover-letter generation, CSV/JSON bulk import, PWA install prompt, TOTP + passkey login flows, Playwright smoke tests, and a Pro paywall wired to the 402-response pattern.",
+    icon: LayoutDashboard,
+    status: "ok",
+    statusLabel: "stable",
+    githubUrl: "https://github.com/lekhrocks/interview-tracker",
+    tags: [
+      "Next.js 14", "React 18", "TypeScript", "Tailwind CSS",
+      "React Query", "Zod", "Playwright", "PWA",
+    ],
+    metrics: [
+      { label: "pages",    value: "15+ routes" },
+      { label: "e2e",      value: "Playwright" },
+      { label: "SSR",      value: "HydrationBoundary" },
     ],
   },
 ];

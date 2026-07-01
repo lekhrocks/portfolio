@@ -144,7 +144,7 @@ export default function Hero() {
 
             <div className="min-w-0">
               <div className="mono-label">role</div>
-              <div className="text-sm text-white">SDE II · AppDirect</div>
+              <div className="text-sm text-white">Sr. SWE · CP Axtra</div>
             </div>
 
             <Divider />

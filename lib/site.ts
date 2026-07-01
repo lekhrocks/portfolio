@@ -5,9 +5,9 @@
 export const siteConfig = {
   name: "Lekhraj Kumar",
   shortName: "Lekhraj",
-  jobTitle: "Software Engineer",
+  jobTitle: "Senior Software Engineer",
   tagline: "Backend Software Engineer who also works in UI using React",
-  bio: "Software Engineer with 5+ years building high-throughput distributed systems in payments and SaaS. Java, Spring Boot, Kafka, microservices and React.",
+  bio: "Software Engineer with 5+ years building high-throughput distributed systems in payments, SaaS, and retail-tech. Java, Spring Boot, Kafka, microservices and React.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://lekhrajkumar.vercel.app",
   email: "lekh.nith@gmail.com",
   location: {
@@ -36,6 +36,7 @@ export const siteConfig = {
     "System Design",
     "React Developer",
     "AppDirect",
+    "CP Axtra",
     "Pune",
   ],
 } as const;

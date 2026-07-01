@@ -28,9 +28,9 @@ function NitLogo() {
 }
 
 const FACTS = [
-  { label: "current",  value: "AppDirect — SDE II" },
-  { label: "since",    value: "Sep 2022" },
-  { label: "location", value: "Pune, IN" },
+  { label: "current",  value: "CP Axtra — Sr. SWE" },
+  { label: "since",    value: "Jun 2026" },
+  { label: "location", value: "Remote" },
   { label: "open to",  value: "Senior · Staff" },
 ];
 
@@ -59,11 +59,17 @@ export default function About() {
               I&apos;m a Software Engineer with{" "}
               <span className="text-white font-medium">5+ years</span> building and scaling
               high-throughput distributed systems in{" "}
-              <span className="text-[var(--accent)]">payments and SaaS</span>.
+              <span className="text-[var(--accent)]">payments, SaaS, and retail-tech</span>.
             </p>
             <p className="text-slate-300 text-sm leading-relaxed mt-3">
-              At <span className="text-white font-medium">AppDirect</span> I design and own
-              high-availability microservices for Billing, Checkout, Notifications, and
+              At <span className="text-white font-medium">CP Axtra</span>, I&apos;m building
+              backend microservices for a payment-related invoice processing system — reactive
+              WebFlux, Kafka event pipelines, Keycloak OAuth2, distributed ShedLock schedulers,
+              and a Testcontainers integration framework targeting 75% instruction coverage.
+            </p>
+            <p className="text-slate-300 text-sm leading-relaxed mt-3">
+              Previously at <span className="text-white font-medium">AppDirect</span> I designed
+              and owned high-availability microservices for Billing, Checkout, Notifications, and
               Payments — supporting thousands of concurrent requests with sub-200ms p99 latency.
               I led the migration from{" "}
               <span className="text-white font-medium">RabbitMQ to Kafka</span>, achieving a{" "}
@@ -189,7 +195,7 @@ export default function About() {
             <ul className="space-y-2 text-xs text-slate-300">
               <li className="flex items-start gap-2">
                 <span className="text-[var(--accent)] mt-0.5">›</span>
-                <span>Owning Billing &amp; Payments microservices at AppDirect</span>
+                <span>Building Invoice Management System at CP Axtra</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[var(--accent)] mt-0.5">›</span>
@@ -197,7 +203,7 @@ export default function About() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[var(--accent)] mt-0.5">›</span>
-                <span>Serving notice · interviewing</span>
+                <span>Senior Software Engineer · CP Axtra</span>
               </li>
             </ul>
           </motion.div>
