@@ -29,6 +29,20 @@ const GROUPS: Group[] = [
       { name: "GraphQL" },
       { name: "WebSockets" },
       { name: "OAuth2" },
+      { name: "Spring AI", primary: true },
+    ],
+  },
+  {
+    id: "ai-llm",
+    title: "AI & LLMs",
+    skills: [
+      { name: "OpenAI / GPT", primary: true },
+      { name: "Anthropic / Claude", primary: true },
+      { name: "Cohere" },
+      { name: "Groq" },
+      { name: "Ollama" },
+      { name: "RAG" },
+      { name: "Prompt Engineering" },
     ],
   },
   {
