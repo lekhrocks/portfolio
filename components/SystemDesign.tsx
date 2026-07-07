@@ -9,16 +9,18 @@ import RouterDiagram, { type DiagramMode } from "@/components/diagrams/RouterDia
 import KafkaDiagram from "@/components/diagrams/KafkaDiagram";
 import EcommerceDiagram from "@/components/diagrams/EcommerceDiagram";
 import InterviewTrackerDiagram from "@/components/diagrams/InterviewTrackerDiagram";
+import EkaDiagram from "@/components/diagrams/EkaDiagram";
 
 type DiagramDef = {
   id: string;
   title: string;
   subtitle: string;
   tags: string[];
-  modes: DiagramMode[];
+  modes: string[];
   /** Caption per mode — explains what the reader is looking at. */
-  captions: Partial<Record<DiagramMode, string>>;
-  Component: React.ComponentType<{ mode?: DiagramMode; playKey?: number }>;
+  captions: Record<string, string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Component: React.ComponentType<{ mode?: any; playKey?: number }>;
 };
 
 const diagrams: DiagramDef[] = [
@@ -84,19 +86,37 @@ const diagrams: DiagramDef[] = [
     },
     Component: InterviewTrackerDiagram,
   },
+  {
+    id: "eka",
+    title: "EKA Knowledge Assistant",
+    subtitle: "Spring Boot reactive · Next.js 16 · pgvector · Kafka · Neo4j · 3 LLM providers",
+    tags: ["Java 21", "Spring WebFlux", "Next.js 16", "pgvector", "Kafka", "Neo4j", "Anthropic", "OpenAI"],
+    modes: ["topology", "query", "ingest"],
+    captions: {
+      topology:
+        "Full-stack architecture split into two planes. Left: Query path — Next.js 16 frontend → Spring Cloud Gateway → JWT auth (OAuth2 + email-password) → Chat Service (intent detection → hybrid retrieval → LLM routing → streamed response). Right: Ingestion path — GitHub/GitLab/Confluence/web connectors → Kafka topic → Ingestion worker → chunking (code-aware + heading-aware) → embedding (OpenAI/Voyage) → pgvector batch upsert → optional Neo4j graph population. Observability via Prometheus + distributed tracing.",
+      query:
+        "Happy-path query trace. 5 steps: (1) SSE POST from frontend, (2) JWT auth validated with Role enum, (3) IntentDetector classifies the query and selects the LLM provider, (4) HybridRetrievalService runs vector+keyword search against pgvector with Cohere reranking, (5) LLM Router streams tokens back over SSE. Conversation history cached in ReactiveRedisTemplate — fully non-blocking.",
+      ingest:
+        "Ingestion trace. Source connector pushes a file URL to the eka.ingestion.requests Kafka topic. The Ingestion consumer downloads, parses, code-aware-splits (or heading-aware-splits for docs), generates embeddings via the configured provider, and batch-upserts into pgvector. A separate GraphAdapter optionally extracts entities and persists to Neo4j. Errors go to a DLQ topic with at-least-once delivery semantics.",
+    },
+    Component: EkaDiagram,
+  },
 ];
 
-const MODE_LABEL: Record<DiagramMode, string> = {
+const MODE_LABEL: Record<string, string> = {
   topology: "Topology",
   sequence: "Sequence",
   failure: "Failure mode",
+  query: "Query trace",
+  ingest: "Ingestion trace",
 };
 
 export default function SystemDesign() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   const [active, setActive] = useState(0);
-  const [mode, setMode] = useState<DiagramMode>("topology");
+  const [mode, setMode] = useState<string>("topology");
   const [playKey, setPlayKey] = useState(0);
   const [showLegend, setShowLegend] = useState(true);
 
@@ -111,7 +131,7 @@ export default function SystemDesign() {
     setPlayKey(0);
   };
 
-  const onModeChange = (m: DiagramMode) => {
+  const onModeChange = (m: string) => {
     setMode(m);
     if (m !== "topology") setPlayKey((k) => k + 1);
   };

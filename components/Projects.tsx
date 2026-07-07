@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   BriefcaseBusiness,
   LayoutDashboard,
+  Bot,
 } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
 import SectionHeader from "@/components/console/SectionHeader";
@@ -119,6 +120,46 @@ const services: Service[] = [
       { label: "pages",    value: "15+ routes" },
       { label: "e2e",      value: "Playwright" },
       { label: "SSR",      value: "HydrationBoundary" },
+    ],
+  },
+  {
+    id: "eka-backend",
+    title: "eka-backend",
+    subtitle: "AI-powered engineering knowledge assistant — API backend",
+    description:
+      "Spring Boot reactive backend for an LLM-powered knowledge assistant: retrieves and reasons over indexed engineering docs, code repos, APIs, and production systems. Supports semantic + hybrid search, multi-provider LLM routing (Anthropic, OpenAI, Ollama), ingestion pipelines (GitHub, GitLab, Confluence, web), Neo4j knowledge graphs, and JWT+OAuth2 auth with email-password fallback.",
+    icon: Bot,
+    status: "ok",
+    statusLabel: "stable",
+    githubUrl: "https://github.com/lekhrocks/eka-backend",
+    tags: [
+      "Java 21", "Spring Boot 3.4", "Spring WebFlux", "PostgreSQL+pgvector",
+      "Apache Kafka", "Redis", "Neo4j", "Docker",
+    ],
+    metrics: [
+      { label: "tests",     value: "60+ unit" },
+      { label: "migrations",value: "8 versions" },
+      { label: "audit",     value: "91 fix items" },
+    ],
+  },
+  {
+    id: "eka-frontend",
+    title: "eka-frontend",
+    subtitle: "EKA chat UI & analytics dashboard — Next.js App Router",
+    description:
+      "Full Next.js 16 App Router frontend for the EKA knowledge assistant. Features LLM chat with SSE streaming, hybrid code search, ingestion source management, interactive Neo4j knowledge graph, usage analytics, observability dashboards, admin user management, and email+OAuth2 auth. Radix UI primitives, TanStack Query server state, Zustand client state, Tailwind v4 theming.",
+    icon: LayoutDashboard,
+    status: "ok",
+    statusLabel: "stable",
+    githubUrl: "https://github.com/lekhrocks/eka-frontend",
+    tags: [
+      "Next.js 16", "React 19", "TypeScript", "Tailwind CSS v4",
+      "TanStack Query 5", "Zustand 5", "SSE", "Radix UI",
+    ],
+    metrics: [
+      { label: "routes",    value: "12 pages" },
+      { label: "real-time", value: "SSE chat" },
+      { label: "auth",      value: "3 channels" },
     ],
   },
 ];

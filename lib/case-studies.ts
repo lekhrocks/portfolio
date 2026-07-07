@@ -449,6 +449,135 @@ export const caseStudies: CaseStudy[] = [
       "Playwright mocked at the HTTP boundary is the right granularity for smoke tests — fast, hermetic, and honest about the UI logic without needing a real database.",
     ],
   },
+  {
+    slug: "eka-knowledge-assistant",
+    projectId: "eka-backend",
+    title: "Engineering Knowledge Assistant",
+    subtitle: "Full-stack LLM-powered assistant for code, APIs, and production systems",
+    summary:
+      "Designed and built a production-grade engineering knowledge assistant — a Spring Boot reactive backend paired with a Next.js App Router frontend — that ingests, indexes, and retrieves knowledge from code repos, documentation, APIs, and production observability data through semantic search, multi-provider LLM routing, and Neo4j knowledge graphs. The full system was then hardened through a 91-item audit covering security, data integrity, performance, accessibility, and test coverage across both tiers.",
+    role:
+      "Sole engineer — owned architecture, backend implementation, frontend implementation, ingestion pipelines, LLM integration, security hardening, and audit remediation across 27 files end to end.",
+    team: "Personal full-stack project (production-grade)",
+    duration: "~12 weeks across nights/weekends (including audit remediation)",
+    stack: [
+      "Java 21", "Spring Boot 3.4", "Spring WebFlux", "PostgreSQL + pgvector",
+      "Apache Kafka", "Redis", "Neo4j", "Docker",
+      "Next.js 16", "React 19", "TypeScript", "Tailwind CSS v4",
+      "TanStack Query 5", "Zustand 5", "Radix UI",
+    ],
+    accent: { from: "#06b6d4", to: "#8b5cf6", glow: "rgba(6,182,212,0.45)" },
+    githubUrl: "https://github.com/lekhrocks/eka-backend",
+    architectureId: "eka",
+    problem: {
+      heading: "The Problem",
+      body: [
+        "Engineering organizations maintain knowledge across scattered systems — code repositories, API documentation, Confluence pages, production dashboards, and incident post-mortems. Finding a specific answer often means searching five different tools, none of which understand the semantic relationship between a code change, the API it broke, and the Confluence page that documented the old behaviour.",
+        "The goal was to build a single assistant that could ingest all these sources, index them into a searchable knowledge graph, and answer natural-language questions by retrieving the most relevant chunks and synthesising them through an LLM — without hallucinating non-existent APIs or code.",
+      ],
+    },
+    constraints: {
+      heading: "Constraints",
+      body: [
+        "The system had to work reliably enough to be useful in a real engineering workflow, with clear failure modes and no silent data loss.",
+      ],
+      bullets: [
+        "LLM responses must never fabricate APIs, endpoints, or code signatures — retrieval results are the only source of truth, the LLM is a summariser, not a generator of new engineering facts",
+        "Chat responses must stream tokens progressively — no multi-second pauses while the full response is generated server-side",
+        "Ingestion must be async and durable — a failure in the embedding step must not lose the raw document",
+        "Authentication must support both OAuth2 (production) and email+password (local dev) without dual code paths",
+        "The frontend must render correctly for keyboard-only users — hover-reveal action groups are a common failure point",
+        "91 audit findings at baseline (24 HIGH, 47 MEDIUM, 20 LOW) must be addressed before the system is production-ready",
+      ],
+    },
+    approach: {
+      heading: "Approach",
+      body: [
+        "I split the system into two independent deployables: a Spring Boot reactive backend and a Next.js App Router frontend, communicating over HTTP and SSE. The backend owns the data layer, LLM routing, and ingestion; the frontend owns the user experience, streaming visualisation, and dashboard surface.",
+        "The backend is modular by domain: auth (JWT filtering + OAuth2 success handling), chat (streaming + citation extraction + context building), ingestion (connectors → chunking → embedding → vector store), retrieval (hybrid search + reranking + semantic cache), graph (Neo4j entity extraction and traversal), and admin (user management, feedback collection). Each module owns its persistence, its reactive chains compose through WebFlux, and blocking operations (JPA, LLM HTTP calls) are isolated on boundedElastic schedulers.",
+        "The frontend follows the same domain-sliced pattern under src/features/: chat, search, sources, graph, analytics, observability, admin, and settings. Server state flows through TanStack Query 5 with centralised query keys; client state (auth tokens, UI preferences) lives in Zustand 5 with localStorage persistence. Chat uses a custom SSE reader that hand-reassembles chunked data: lines across TCP segment boundaries — a common bug in streaming implementations that I confirmed and fixed during the audit.",
+        "The ingestion pipeline is Kafka-driven: ingestion requests are published to a topic, consumed by a stateless processor that downloads, parses, chunks (code-aware + heading-aware splitters), embeds (OpenAI or Voyage), and upserts into pgvector in batch writes. Neo4j graph population is optional and disabled by default. The architecture ensures the pipeline can be scaled horizontally by adding consumers, and failures at any stage are recoverable without data loss.",
+        "After the initial implementation, I ran two comprehensive code audits that identified 91 issues. These were fixed across 27 files in 5 commits: build foundation (Java 21 LTS, Spring Boot GA, dependency pinning), security hardening (JWT role validation, cross-user conversation ownership, removal of default secrets, OAuth2 secure delivery), data integrity (reactive Redis cache, repository-layer persistence, missing database indexes, structured error logging), frontend robustness (Zustand persist consolidation, SSE buffer fix, accessibility compliance), and the addition of email+password authentication for local development.",
+      ],
+      bullets: [
+        "Backend: 12 Gradle modules (eka-auth, eka-chat, eka-ingestion, eka-retrieval, eka-embedding, eka-graph, eka-web, eka-app, eka-common, eka-test, plus two more). Reactive chain composed via WebFlux; blocking JPA/LLM calls on boundedElastic schedulers",
+        "Frontend: 114 source files across 18 directories. Feature-sliced modules under src/features/. Radix UI primitives with Tailwind CSS v4 + CVA for component styling",
+        "SSE streaming: custom ReadableStream reader that buffers incomplete data: lines and reassembles on TCP chunk boundaries — verified fix through the 91-audit remediation (Phase 2, item 2f)",
+        "Audit remediation: 5 logical commits touching 27 backend+frontend files. Build → Security → Data Integrity → Frontend Auth → Tests. ./gradlew build green, zero warnings",
+        "Email+password auth: BCryptPasswordEncoder; POST /api/v1/auth/login and /register; V9 migration adds password_hash column; existing OAuth2 users get a clear error hint if they try email login",
+      ],
+    },
+    tradeoffs: [
+      {
+        decision: "Reactive vs imperative backend",
+        chose: "Spring WebFlux (reactive) for the API gateway and chat streaming; blocking JPA on boundedElastic",
+        over: "Pure reactive with R2DBC or pure imperative with WebFlux removed",
+        why: "R2DBC's ecosystem maturity didn't match JPA's for the relational-heavy domain (users, conversations, sources, feedback). The boundedElastic pattern keeps the reactive surface clean where it matters (streaming, gateway) while using JPA where it's productive. The audit confirmed this with the ConversationCacheService migration from StringRedisTemplate → ReactiveRedisTemplate — the blocking Redis template was the one place the architecture was inconsistent.",
+      },
+      {
+        decision: "LLM provider strategy",
+        chose: "Multi-provider router with per-intent overrides",
+        over: "Single provider (e.g. only Anthropic) or purely client-side LLM calls",
+        why: "Different engineering tasks benefit from different models — code generation favours OpenAI, analytical tasks favour Anthropic, and local experimentation favours Ollama. The IntentDetector classifies the user's query before routing, so overrides are transparent to the chat UI.",
+      },
+      {
+        decision: "Frontend state management",
+        chose: "TanStack Query for server state + Zustand for client state",
+        over: "Redux Toolkit, Jotai, or single-state all-in-one",
+        why: "Two different problems need two different primitives. TanStack Query's caching, polling, and invalidation patterns are purpose-built for API state. Zustand's minimal API and persist middleware handle auth tokens and UI preferences without ceremony. Merging both into a single store creates coupling between cache invalidation and UI reactivity that neither tool optimises for.",
+      },
+      {
+        decision: "Auth default: JSON over redirect",
+        chose: "JWT delivered as JSON body (default: json), no token in URL fragment",
+        over: "302 redirect with #token=<jwt> in URL fragment",
+        why: "Tokens in URLs are a security smell — they leak through Referer headers, server logs, and browser history. The JSON delivery mode keeps the token in the response body, which the frontend reads once and stores in Zustand persist (localStorage). The audit made this the default (Phase 1, item 1e) and added Referrer-Policy: no-referrer to the JSON response.",
+      },
+      {
+        decision: "Conversation ownership enforcement",
+        chose: "verifyOwnership() guard on every conversation endpoint",
+        over: "Repository-level filtering by userId or no check (initial state)",
+        why: "The initial implementation had no ownership check — any authenticated user could read or delete any conversation. The audit (Phase 1, items 1b-1c) flagged this as HIGH severity. The fix is a single reusable guard in ConversationController that checks UUID equality before any operation, returning 404 for non-existent and 403 for unauthorised access.",
+      },
+      {
+        decision: "Cache reactivity",
+        chose: "ReactiveRedisTemplate for conversation cache",
+        over: "Keeping StringRedisTemplate with blocking calls in a reactive chain",
+        why: "The original ConversationCacheService used StringRedisTemplate inside getHistory(), which was called from a Mono.flatMap() chain. The blocking Redis call pinned a boundedElastic thread unnecessarily. The audit (Phase 2, item 2e) replaced it with ReactiveRedisTemplate returning Mono<List<Message>>, letting the chain stay fully non-blocking.",
+      },
+      {
+        decision: "Database connection topology",
+        chose: "Single PostgreSQL instance with pgvector extension",
+        over: "Separate vector database (Pinecone, Weaviate) + relational DB",
+        why: "A second database adds operational complexity, network latency on every hybrid query, and a dual-write problem for new chunks. pgvector inside PostgreSQL keeps the vector search columnar in the same transaction context as the metadata — the hybrid query (embedding cosine similarity + keyword WHERE clause) is a single SQL statement.",
+      },
+      {
+        decision: "Secret management",
+        chose: "No default secrets — fail at startup if env vars unset; K8s configtree path",
+        over: "Default secrets in application.yml for local convenience",
+        why: "DB_PASSWORD:secret and NEO4J_PASSWORD:password in application.yml meant a misconfigured deployment would start with known default credentials. The audit (Phase 1, items 1f-1g) removed all defaults — startup fails immediately when required env vars are missing. spring.config.import: optional:configtree:/etc/secrets/ provides the K8s secrets mount path.",
+      },
+    ],
+    outcome: [
+      { label: "Backend modules", value: "12 modules", hint: "Gradle multi-module, JaCoCo 30% line gate" },
+      { label: "Frontend pages", value: "12 routes", hint: "chat, search, graph, analytics, admin, observability, ingestion, sources, settings" },
+      { label: "Tests", value: "60+ unit", hint: "JUnit 5 + Testcontainers + WebFlux slice tests" },
+      { label: "Audit issues fixed", value: "91 items", hint: "24 HIGH, 47 MEDIUM, 20 LOW; 27 files changed" },
+      { label: "Build health", value: "Zero warnings", hint: "Neo4j Direction.OUTGOING warning resolved" },
+      { label: "Auth channels", value: "3 channels", hint: "Google OAuth2, GitHub OAuth2, email+password" },
+      { label: "LLM providers", value: "3 providers", hint: "Anthropic, OpenAI, Ollama (per-intent routing)" },
+      { label: "Ingestion connectors", value: "4 types", hint: "GitHub, GitLab, Confluence, web crawler" },
+    ],
+    lessons: [
+      "A reactive architecture is only as reactive as its most blocking dependency. The ConversationCacheService was using a blocking Redis template inside a reactive chain — the audit caught it because the symptom was intermittent, not a crash.",
+      "Multi-module Gradle projects need dependency management as much as they need domain modelling. Pinning Spring Boot 3.5.0 → 3.4.5 GA and removing the milestone repo wasn't ideological — 3.5.0-M5 dependencies were pulling in incompatible transitive versions that only surfaced at runtime.",
+      "Ownership enforcement at the controller level is a rubber stamp without a test that exercises the cross-user path. The audit found the gap before anyone exploited it, and the fix was a single verifyOwnership() method — but it required changing every endpoint signature.",
+      "Default secrets in application.yml are a blind spot because they work perfectly in local dev and silently ship to production. Removing the default and letting the JVM fail at startup is the only safe pattern.",
+      "SSE streaming is harder than it looks. The TCP chunk boundary bug (splitting a \\n\\n across two reads) would corrupt every Nth message under load — the fix was one line (`buffer = parts.pop() ?? ''`) that the audit identified by reasoning about the buffer reassembly logic, not by reproducing the timing.",
+      "Zustand persist middleware eliminates an entire class of bugs where localStorage reads happen before the React hydration pass. Consolidating four files of manual getItem/setItem calls into one store was the smallest diff with the largest correctness impact in the frontend audit.",
+      "The transactional outbox pattern is overkill for this system's scale, but the principle — don't dual-write — informed the Kafka ingestion pipeline design. Ingestion requests are published to a topic; the consumer acknowledges after the chunk is persisted. A crash between consume and acknowledge means at-least-once delivery, which the upsert handles.",
+      "Two code audits caught issues the initial implementation missed not because of carelessness, but because the second pass reads the code from a different altitude — line-by-line reviews find buffer split bugs; structural reviews find missing ownership checks. Both altitudes are necessary.",
+    ],
+  },
 ];
 
 export function getCaseStudyBySlug(slug: string): CaseStudy | undefined {
