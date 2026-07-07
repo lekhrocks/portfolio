@@ -133,8 +133,9 @@ const services: Service[] = [
     statusLabel: "stable",
     githubUrl: "https://github.com/lekhrocks/eka-backend",
     tags: [
-      "Java 21", "Spring Boot 3.4", "Spring WebFlux", "PostgreSQL+pgvector",
-      "Apache Kafka", "Redis", "Neo4j", "Docker",
+      "Java 21", "Spring Boot 3.4", "Spring WebFlux", "Spring AI",
+      "PostgreSQL+pgvector", "Apache Kafka", "Redis", "Neo4j",
+      "OpenAI", "Anthropic", "Cohere", "Docker",
     ],
     metrics: [
       { label: "tests",     value: "60+ unit" },
@@ -155,6 +156,7 @@ const services: Service[] = [
     tags: [
       "Next.js 16", "React 19", "TypeScript", "Tailwind CSS v4",
       "TanStack Query 5", "Zustand 5", "SSE", "Radix UI",
+      "Recharts", "react-markdown", "Mermaid",
     ],
     metrics: [
       { label: "routes",    value: "12 pages" },

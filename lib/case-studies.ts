@@ -461,8 +461,9 @@ export const caseStudies: CaseStudy[] = [
     team: "Personal full-stack project (production-grade)",
     duration: "~12 weeks across nights/weekends (including audit remediation)",
     stack: [
-      "Java 21", "Spring Boot 3.4", "Spring WebFlux", "PostgreSQL + pgvector",
-      "Apache Kafka", "Redis", "Neo4j", "Docker",
+      "Java 21", "Spring Boot 3.4", "Spring WebFlux", "Spring AI",
+      "PostgreSQL + pgvector", "Apache Kafka", "Redis", "Neo4j",
+      "OpenAI", "Anthropic", "Cohere", "Docker",
       "Next.js 16", "React 19", "TypeScript", "Tailwind CSS v4",
       "TanStack Query 5", "Zustand 5", "Radix UI",
     ],

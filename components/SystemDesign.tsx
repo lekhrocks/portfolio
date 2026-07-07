@@ -90,7 +90,7 @@ const diagrams: DiagramDef[] = [
     id: "eka",
     title: "EKA Knowledge Assistant",
     subtitle: "Spring Boot reactive · Next.js 16 · pgvector · Kafka · Neo4j · 3 LLM providers",
-    tags: ["Java 21", "Spring WebFlux", "Next.js 16", "pgvector", "Kafka", "Neo4j", "Anthropic", "OpenAI"],
+    tags: ["Java 21", "Spring AI", "Spring WebFlux", "Next.js 16", "pgvector", "Kafka", "Neo4j", "Anthropic", "OpenAI", "Cohere"],
     modes: ["topology", "query", "ingest"],
     captions: {
       topology:
