@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import JsonLd from "@/components/JsonLd";
 import DevConsoleSignature from "@/components/DevConsoleSignature";
 import { siteConfig } from "@/lib/site";
@@ -102,6 +103,7 @@ export default function RootLayout({
         <JsonLd />
         <DevConsoleSignature />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
