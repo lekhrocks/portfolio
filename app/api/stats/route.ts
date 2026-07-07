@@ -96,13 +96,48 @@ async function fetchGithub(): Promise<StatsResponse["github"]> {
 }
 
 /**
- * Aggregated stats endpoint — pulls GitHub live, returns LeetCode + experience static.
- * Cached at the edge for 6h; falls back gracefully if GitHub is rate-limited.
+ * Aggregated stats endpoint — pulls GitHub live, LeetCode live (fallback to static).
+ * Cached at the edge for 6h; falls back gracefully if any API is rate-limited.
  *
  *   curl https://lekhrajkumar.dev/api/stats
  */
+const LEETCODE_FALLBACK = { user: siteConfig.social.leetcodeUser, solved: 729, profileUrl: siteConfig.social.leetcode };
+
+async function fetchLeetcode(): Promise<typeof LEETCODE_FALLBACK> {
+  try {
+    const query = `{
+      matchedUser(username: "${siteConfig.social.leetcodeUser}") {
+        submitStats { acSubmissionNum { difficulty count } }
+        profile { ranking }
+      }
+    }`;
+    const res = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      next: { revalidate: 21600 },
+      body: JSON.stringify({ query }),
+    });
+    if (!res.ok) return LEETCODE_FALLBACK;
+    const json = await res.json();
+    const total = json?.data?.matchedUser?.submitStats?.acSubmissionNum?.find(
+      (d: { difficulty: string }) => d.difficulty === "All"
+    );
+    const ranking = json?.data?.matchedUser?.profile?.ranking;
+    if (!total || typeof total.count !== "number") return LEETCODE_FALLBACK;
+    return {
+      user: siteConfig.social.leetcodeUser,
+      solved: total.count,
+      profileUrl: ranking
+        ? `https://leetcode.com/u/${siteConfig.social.leetcodeUser}/`
+        : siteConfig.social.leetcode,
+    };
+  } catch {
+    return LEETCODE_FALLBACK;
+  }
+}
+
 export async function GET() {
-  const github = await fetchGithub();
+  const [github, leetcode] = await Promise.all([fetchGithub(), fetchLeetcode()]);
 
   const startYear = 2020;
   const now = new Date();
@@ -111,11 +146,7 @@ export async function GET() {
   const body: StatsResponse = {
     generatedAt: now.toISOString(),
     github,
-    leetcode: {
-      user: siteConfig.social.leetcodeUser,
-      solved: 729,
-      profileUrl: siteConfig.social.leetcode,
-    },
+    leetcode,
     experience: {
       yearsAtCompany: 3,
       yearsTotal,
