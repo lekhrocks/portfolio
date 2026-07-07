@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap, MapPin, Building2, Star, Quote } from "lucide-react";
 import SectionHeader from "@/components/console/SectionHeader";
@@ -35,6 +35,19 @@ const FACTS = [
 ];
 
 export default function About() {
+  const [leetCodeSolved, setLeetCodeSolved] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancel = false;
+    fetch("/api/stats", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.leetcode?.solved && !cancel && setLeetCodeSolved(d.leetcode.solved))
+      .catch(() => {});
+    return () => { cancel = true; };
+  }, []);
+
+  const liveLeetCode = leetCodeSolved ?? 729;
+
   return (
     <section id="about" className="section-padding scroll-mt-20">
       <div className="max-w-6xl mx-auto">
@@ -108,7 +121,7 @@ export default function About() {
               <span className="mono-label">leetcode</span>
               <LeetcodeIcon size={14} className="text-[#FFA116]" />
             </div>
-            <div className="text-3xl font-semibold font-mono text-white leading-none">729+</div>
+            <div className="text-3xl font-semibold font-mono text-white leading-none">{liveLeetCode}+</div>
             <div className="text-xs text-slate-400 mt-1">problems solved</div>
             <div className="text-[11px] text-slate-500 mt-2 truncate">@lekh_nith · Top 10%</div>
           </motion.a>

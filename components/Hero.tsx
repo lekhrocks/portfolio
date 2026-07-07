@@ -56,6 +56,7 @@ const RECENT_ACTIVITY = [
 
 export default function Hero() {
   const [health, setHealth] = useState<Health | null>(null);
+  const [leetCodeSolved, setLeetCodeSolved] = useState<number | null>(null);
 
   useEffect(() => {
     let cancel = false;
@@ -63,12 +64,21 @@ export default function Hero() {
       .then((r) => r.json())
       .then((d: Health) => !cancel && setHealth(d))
       .catch(() => {});
+    fetch("/api/stats", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.leetcode?.solved && !cancel && setLeetCodeSolved(d.leetcode.solved))
+      .catch(() => {});
     return () => {
       cancel = true;
     };
   }, []);
 
   const region = health?.region && health.region !== "local" ? health.region : "ap-south-1";
+
+  const liveLeetCode = leetCodeSolved ? `${leetCodeSolved}+` : "729+";
+  const displayMetrics = METRICS.map((m) =>
+    m.label === "LeetCode solved" ? { ...m, value: liveLeetCode } : m,
+  );
 
   return (
     <section className="relative pt-28 pb-16 px-4 sm:px-6 lg:px-8 bg-dot-grid">
@@ -182,7 +192,7 @@ export default function Hero() {
           transition={{ duration: 0.35, delay: 0.1 }}
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-[var(--panel-border)] border border-[var(--panel-border)] rounded-xl overflow-hidden mb-6"
         >
-          {METRICS.map((m) => (
+          {displayMetrics.map((m) => (
             <div
               key={m.label}
               className="bg-[var(--panel-bg)] p-4 transition-colors hover:bg-[var(--panel-bg-hover)]"
