@@ -69,8 +69,8 @@ export const metadata: Metadata = {
     creator: "@lekhrocks",
   },
   icons: {
-    icon: [{ url: "/favicon.ico" }],
-    apple: [{ url: "/apple-touch-icon.png" }],
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/lekhraj.png" }],
   },
   formatDetection: { email: false, address: false, telephone: false },
 };
