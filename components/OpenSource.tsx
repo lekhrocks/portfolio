@@ -1,118 +1,122 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { GitPullRequest, GitMerge, CircleDot, CheckCircle2, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
 import SectionHeader from "@/components/console/SectionHeader";
 import StatusPill from "@/components/console/StatusPill";
 
-export type Contribution = {
+type RawEntry = {
   id: string;
   type: "pr" | "issue";
-  project: string;
   repoUrl: string;
-  description: string;
-  status: "merged" | "open" | "closed" | "active" | "wip";
-  tags: string[];
-  link?: string;
+  link: string;
 };
 
-const contributions: Contribution[] = [
-  {
-    id: "debezium-pr-7632",
-    type: "pr",
-    project: "debezium/debezium",
-    repoUrl: "https://github.com/debezium/debezium",
-    description:
-      "Fixed hardcoded MySQL connector type in CdcSourceTaskContext.temporaryLoggingContext.",
-    status: "merged",
-    tags: ["Java", "Kafka Connect", "Debezium"],
-    link: "https://github.com/debezium/debezium/pull/7632",
-  },
-  {
-    id: "dbz-2209",
-    type: "issue",
-    project: "debezium/dbz",
-    repoUrl: "https://github.com/debezium/dbz",
-    description:
-      "Migrate connectors from deprecated dispatchHeartbeatEvent to alwaysDispatchHeartbeatEvent as part of DBZ-9176 ScheduledHeartbeat.",
-    status: "open",
-    tags: ["core-library", "task"],
-    link: "https://github.com/debezium/dbz/issues/2209",
-  },
-  {
-    id: "dbz-2210",
-    type: "issue",
-    project: "debezium/dbz",
-    repoUrl: "https://github.com/debezium/dbz",
-    description:
-      "Identified hardcoded MySQL connector type in CdcSourceTaskContext. Fixed via debezium/debezium#7632.",
-    status: "closed",
-    tags: ["bug"],
-    link: "https://github.com/debezium/dbz/issues/2210",
-  },
-  {
-    id: "dbz-2214",
-    type: "issue",
-    project: "debezium/dbz",
-    repoUrl: "https://github.com/debezium/dbz",
-    description:
-      "Expose queue fill ratio in ChangeEventQueue so sources can preemptively throttle before blocking.",
-    status: "open",
-    tags: ["enhancement"],
-    link: "https://github.com/debezium/dbz/issues/2214",
-  },
+type FetchedItem = {
+  url: string;
+  ok: boolean;
+  data: {
+    number: number;
+    title: string;
+    state: "open" | "closed";
+    merged: boolean;
+    labels: string[];
+    body: string;
+  } | null;
+};
+
+type Contribution = RawEntry & {
+  title: string;
+  state: "open" | "closed";
+  merged: boolean;
+  labels: string[];
+  body: string;
+  project: string;
+};
+
+const SOURCE: RawEntry[] = [
+  { id: "debezium-pr-7632", type: "pr",    repoUrl: "https://github.com/debezium/debezium", link: "https://github.com/debezium/debezium/pull/7632" },
+  { id: "dbz-2209",         type: "issue", repoUrl: "https://github.com/debezium/dbz",       link: "https://github.com/debezium/dbz/issues/2209" },
+  { id: "dbz-2210",         type: "issue", repoUrl: "https://github.com/debezium/dbz",       link: "https://github.com/debezium/dbz/issues/2210" },
+  { id: "dbz-2214",         type: "issue", repoUrl: "https://github.com/debezium/dbz",       link: "https://github.com/debezium/dbz/issues/2214" },
 ];
 
 const PER_PAGE = 5;
 
-function TypeIcon({ type, status }: { type: Contribution["type"]; status: Contribution["status"] }) {
+function TypeIcon({ type, merged, state }: { type: "pr" | "issue"; merged: boolean; state: "open" | "closed" }) {
   if (type === "pr") {
-    return status === "merged"
-      ? <GitMerge size={13} className="text-purple-400" />
+    return merged ? <GitMerge size={13} className="text-purple-400" />
       : <GitPullRequest size={13} className="text-[var(--accent)]" />;
   }
-  return status === "closed"
+  return state === "closed"
     ? <CheckCircle2 size={13} className="text-emerald-400" />
     : <CircleDot size={13} className="text-orange-400" />;
 }
 
-function StatusBadge({ type, status }: { type: Contribution["type"]; status: Contribution["status"] }) {
-  const tone =
-    (type === "pr" && status === "merged") || (type === "issue" && status === "closed")
-      ? "ok" as const
-      : status === "open"
-        ? "info" as const
-        : "muted" as const;
-
-  const label =
-    (type === "pr" && status === "merged") || (type === "issue" && status === "closed")
-      ? status
-      : status;
-
-  return <StatusPill tone={tone}>{label}</StatusPill>;
+function StatusBadge({ type, merged, state }: { type: "pr" | "issue"; merged: boolean; state: "open" | "closed" }) {
+  if (type === "pr" && merged) return <StatusPill tone="ok">merged</StatusPill>;
+  if (state === "closed") return <StatusPill tone="ok">closed</StatusPill>;
+  return <StatusPill tone="info">open</StatusPill>;
 }
 
 function shortId(id: string) {
   return id.replace("debezium-pr", "PR").replace("dbz", "#");
 }
 
+function projectFromUrl(url: string) {
+  const m = url.match(/github\.com\/([^/]+\/[^/]+)/);
+  return m ? m[1] : url;
+}
+
 export default function OpenSource() {
+  const [items, setItems] = useState<Contribution[] | null>(null);
+  const [error, setError] = useState(false);
   const [filter, setFilter] = useState<"all" | "pr" | "issue">("all");
   const [page, setPage] = useState(1);
 
-  const filtered = contributions.filter(
-    (c) => filter === "all" || c.type === filter,
-  );
+  useEffect(() => {
+    let cancel = false;
+    fetch("/api/contributions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: SOURCE.map((s) => ({ url: s.link })) }),
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((res) => {
+        if (cancel) return;
+        const merged: Contribution[] = SOURCE.map((s, i) => {
+          const f = res.items[i] as FetchedItem;
+          return {
+            ...s,
+            title: f.ok ? f.data!.title : s.id,
+            state: f.ok ? f.data!.state : "open",
+            merged: f.ok ? f.data!.merged : false,
+            labels: f.ok ? f.data!.labels : [],
+            body: f.ok ? f.data!.body : "",
+            project: projectFromUrl(s.repoUrl),
+          };
+        });
+        setItems(merged);
+      })
+      .catch(() => !cancel && setError(true));
+    return () => { cancel = true; };
+  }, []);
+
+  const display = items ?? [];
+  const filtered = display.filter((c) => filter === "all" || c.type === filter);
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const safePage = Math.min(page, totalPages);
   const paged = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
+  const count = (type: "all" | "pr" | "issue") =>
+    type === "all" ? display.length : display.filter((c) => c.type === type).length;
+
   const FILTERS = [
-    { key: "all", label: "All", count: contributions.length },
-    { key: "pr", label: "PRs", count: contributions.filter((c) => c.type === "pr").length },
-    { key: "issue", label: "Issues", count: contributions.filter((c) => c.type === "issue").length },
+    { key: "all",   label: "All",   count: count("all") },
+    { key: "pr",    label: "PRs",   count: count("pr") },
+    { key: "issue", label: "Issues", count: count("issue") },
   ] as const;
 
   return (
@@ -124,7 +128,7 @@ export default function OpenSource() {
           subtitle="Contributions to the broader ecosystem — PRs merged, issues filed, and projects maintained outside my own repos."
           meta={
             <span className="mono-tag text-[var(--text-chrome)]">
-              {contributions.length} contributions
+              {display.length} contributions
             </span>
           }
         />
@@ -148,7 +152,15 @@ export default function OpenSource() {
         </div>
 
         {/* Table */}
-        {paged.length > 0 ? (
+        {error ? (
+          <div className="panel p-6 text-center">
+            <p className="text-xs text-slate-500">GitHub API rate-limited. Contributions will reload next time.</p>
+          </div>
+        ) : !items ? (
+          <div className="panel p-6 text-center">
+            <div className="h-4 w-24 mx-auto rounded animate-pulse" style={{ background: "var(--panel-border)" }} />
+          </div>
+        ) : paged.length > 0 ? (
           <>
             <div className="border border-[var(--panel-border)] rounded-xl overflow-hidden">
               <table className="w-full text-xs font-mono">
@@ -171,13 +183,8 @@ export default function OpenSource() {
                       className="border-b border-[var(--panel-border)] last:border-b-0 hover:bg-[var(--panel-bg-hover)] transition-colors"
                     >
                       <td className="px-4 py-3">
-                        <a
-                          href={c.link || c.repoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block"
-                        >
-                          <TypeIcon type={c.type} status={c.status} />
+                        <a href={c.link} target="_blank" rel="noopener noreferrer" className="block">
+                          <TypeIcon type={c.type} merged={c.merged} state={c.state} />
                         </a>
                       </td>
                       <td className="px-0 py-3">
@@ -187,22 +194,15 @@ export default function OpenSource() {
                         </div>
                       </td>
                       <td className="px-3 py-3 text-slate-400 hidden sm:table-cell max-w-xs truncate">
-                        {c.description}
+                        {c.title}
                       </td>
                       <td className="px-3 py-3">
-                        <StatusBadge type={c.type} status={c.status} />
+                        <StatusBadge type={c.type} merged={c.merged} state={c.state} />
                       </td>
                       <td className="px-3 py-3 hidden md:table-cell">
-                        {c.link && (
-                          <a
-                            href={c.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-slate-500 hover:text-white transition-colors"
-                          >
-                            <ExternalLink size={12} />
-                          </a>
-                        )}
+                        <a href={c.link} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-white transition-colors">
+                          <ExternalLink size={12} />
+                        </a>
                       </td>
                     </motion.tr>
                   ))}
@@ -210,38 +210,24 @@ export default function OpenSource() {
               </table>
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-3">
-                <span className="text-[11px] text-slate-500 font-mono">
-                  page {safePage} of {totalPages}
-                </span>
+                <span className="text-[11px] text-slate-500 font-mono">page {safePage} of {totalPages}</span>
                 <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setPage(Math.max(1, safePage - 1))}
-                    disabled={safePage <= 1}
-                    className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-[var(--panel-bg)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
-                  >
+                  <button onClick={() => setPage(Math.max(1, safePage - 1))} disabled={safePage <= 1}
+                    className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-[var(--panel-bg)] disabled:opacity-30 disabled:pointer-events-none transition-colors">
                     <ChevronLeft size={14} />
                   </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
+                    <button key={p} onClick={() => setPage(p)}
                       className={`w-7 h-7 rounded-md text-xs font-mono transition-colors ${
-                        p === safePage
-                          ? "text-white bg-[var(--panel-bg)]"
-                          : "text-slate-400 hover:text-white hover:bg-[var(--panel-bg)]"
-                      }`}
-                    >
+                        p === safePage ? "text-white bg-[var(--panel-bg)]" : "text-slate-400 hover:text-white hover:bg-[var(--panel-bg)]"
+                      }`}>
                       {p}
                     </button>
                   ))}
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, safePage + 1))}
-                    disabled={safePage >= totalPages}
-                    className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-[var(--panel-bg)] disabled:opacity-30 disabled:pointer-events-none transition-colors"
-                  >
+                  <button onClick={() => setPage(Math.min(totalPages, safePage + 1))} disabled={safePage >= totalPages}
+                    className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-[var(--panel-bg)] disabled:opacity-30 disabled:pointer-events-none transition-colors">
                     <ChevronRight size={14} />
                   </button>
                 </div>
@@ -251,9 +237,7 @@ export default function OpenSource() {
         ) : (
           <div className="panel p-8 text-center">
             <GitPullRequest size={20} className="mx-auto mb-3 text-slate-500" />
-            <p className="text-sm text-slate-400 font-mono">
-              No {filter === "pr" ? "PRs" : filter === "issue" ? "issues" : "contributions"} yet.
-            </p>
+            <p className="text-sm text-slate-400 font-mono">No {filter === "pr" ? "PRs" : filter === "issue" ? "issues" : "contributions"} yet.</p>
           </div>
         )}
       </div>
