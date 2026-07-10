@@ -238,6 +238,9 @@ export default function Hero() {
               <SecondaryAction href="https://leetcode.com/u/lekh_nith/" external>
                 <LeetcodeIcon size={13} /> LeetCode
               </SecondaryAction>
+              <SecondaryAction href="https://github.com/sponsors/lekhrocks" external>
+                <span role="img" aria-label="heart">❤️</span> Sponsor
+              </SecondaryAction>
             </div>
             <div className="mt-4 pt-4 panel-divider">
               <p className="text-xs text-slate-500 leading-relaxed">

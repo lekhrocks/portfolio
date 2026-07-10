@@ -48,6 +48,13 @@ export default function Footer() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <iframe
+              src="https://github.com/sponsors/lekhrocks/button"
+              title="Sponsor lekhrocks"
+              height="32"
+              width="114"
+              style={{ border: 0, borderRadius: 6 }}
+            />
             {[
               { icon: GithubIcon, href: "https://github.com/lekhrocks", label: "GitHub" },
               { icon: LinkedinIcon, href: "https://linkedin.com/in/lekhrajkumar", label: "LinkedIn" },
