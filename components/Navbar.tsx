@@ -9,6 +9,7 @@ const navItems = [
   { id: "02", label: "stack",       href: "#skills" },
   { id: "03", label: "deployments", href: "#experience" },
   { id: "04", label: "services",    href: "#projects" },
+  { id: "05", label: "oss",         href: "#opensource" },
   { id: "06", label: "topology",    href: "#architecture" },
   { id: "07", label: "on-call",     href: "#contact" },
 ];
