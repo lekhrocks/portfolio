@@ -10,6 +10,7 @@ import KafkaDiagram from "@/components/diagrams/KafkaDiagram";
 import EcommerceDiagram from "@/components/diagrams/EcommerceDiagram";
 import InterviewTrackerDiagram from "@/components/diagrams/InterviewTrackerDiagram";
 import EkaDiagram from "@/components/diagrams/EkaDiagram";
+import SyncDiagram from "@/components/diagrams/SyncDiagram";
 
 type DiagramDef = {
   id: string;
@@ -101,6 +102,22 @@ const diagrams: DiagramDef[] = [
         "Ingestion trace. Source connector pushes a file URL to the eka.ingestion.requests Kafka topic. The Ingestion consumer downloads, parses, code-aware-splits (or heading-aware-splits for docs), generates embeddings via the configured provider, and batch-upserts into pgvector. A separate GraphAdapter optionally extracts entities and persists to Neo4j. Errors go to a DLQ topic with at-least-once delivery semantics.",
     },
     Component: EkaDiagram,
+  },
+  {
+    id: "syncflow",
+    title: "SyncFlow",
+    subtitle: "CDC replication · snapshot backfill · pipeline designer · multi-DB · Kafka · hexagonal",
+    tags: ["Java 25", "Spring Boot", "Debezium CDC", "Kafka", "PostgreSQL", "Hexagonal", "Multi-tenant", "Plugin API"],
+    modes: ["topology", "sequence", "failure"],
+    captions: {
+      topology:
+        "Four-tier data sync platform on a hexagonal (ports & adapters) layout. Control plane: operator UI/CLI → REST API → Pipeline Designer (versioned designs + conflict detection) persisted to the pipeline store. Capture + transport: Debezium CDC tails source binlogs → Kafka with a replayable DLQ → Sync Orchestrator applies to targets. Snapshot + scheduling: full-table backfill, a DAG workflow scheduler, and a distributed agent fleet for parallelism. Connectors sit behind SPI ports (CdcProvider, SnapshotProvider, DestinationWriterProvider) so they never touch the core domain. Failure rows land in the dead-letter queue for triage + replay. Observability via Micrometer → Prometheus/Grafana plus SSE live status.",
+      sequence:
+        "Design-to-DONE trace. (1) Operator configures a pipeline. (2) Designer persists the versioned design. (3) Debezium tails a source change (ROW-level) and publishes to Kafka. (4) Sync Orchestrator consumes and applies to the target. (5) A configured workflow schedules downstream work across the agent fleet; snapshot backfill handles the initial copy. Points 3-4 are the hot path — new events keep flowing on every committed source change.",
+      failure:
+        "Two independent failure modes. (1) Poison message in Kafka: consumer detects a non-retriable failure → routes to the DLQ instead of dying. A replay worker re-injects after triage — producers and the source DB are unaffected. (2) Downstream target down: the sync worker keeps consuming Kafka, buffers in the queue, and retries with backoff; the dead-letter queue captures rows that exhaust retries so nothing is silently lost. Multi-tenant data isolation guarantees one tenant's failing pipeline can't poison another's.",
+    },
+    Component: SyncDiagram,
   },
 ];
 

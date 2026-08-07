@@ -579,6 +579,121 @@ export const caseStudies: CaseStudy[] = [
       "Two code audits caught issues the initial implementation missed not because of carelessness, but because the second pass reads the code from a different altitude — line-by-line reviews find buffer split bugs; structural reviews find missing ownership checks. Both altitudes are necessary.",
     ],
   },
+  {
+    slug: "syncflow-data-sync",
+    projectId: "syncflow",
+    title: "SyncFlow — Open-Source Data Sync Platform",
+    subtitle: "Debezium CDC, snapshot backfill, and a versioned pipeline designer for multi-database replication",
+    summary:
+      "Built an open-source data sync platform in Java 25 + Spring Boot on a hexagonal (ports & adapters) architecture: Debezium CDC capture with durable Kafka delivery, snapshot backfill for initial copy, a versioned pipeline designer with conflict detection and a transformation rule engine, a DAG workflow scheduler, a distributed agent fleet, and a Micrometer → Prometheus/Grafana observability stack — with strict multi-tenant data isolation and a replayable dead-letter queue.",
+    role:
+      "Sole engineer — owned the full platform: hexagonal domain model, CDC capture lifecycle, sync orchestration, pipeline design/versioning, connector SPI, workflow scheduling, multi-tenancy, and observability end to end.",
+    team: "Personal open-source platform (production-grade)",
+    duration: "Long-running platform, continuously shipped",
+    stack: [
+      "Java 25", "Spring Boot", "Debezium CDC", "Apache Kafka", "PostgreSQL",
+      "Flyway", "Hexagonal Architecture", "Multi-tenant", "Plugin API", "Docker", "Grafana",
+      "Micrometer", "Prometheus", "SSE",
+    ],
+    accent: { from: "#22d3ee", to: "#8b5cf6", glow: "rgba(34,211,238,0.45)" },
+    githubUrl: "https://github.com/lekhrocks/syncflow",
+    architectureId: "syncflow",
+    problem: {
+      heading: "The Problem",
+      body: [
+        "Moving data between databases is a solved problem for point-to-point ETL tools, but most are either licensed, opaque, or single-source. I wanted an open, self-contained data sync platform where the capture → transport → apply pipeline was transparent end to end — tail a source's change events with CDC, backfill the initial copy with snapshots, transform rows through a declarative mapping, and land them in any connected target without locking users to one vendor.",
+        "The harder requirement was operational trust: every event had to be delivered at-least-once, failures had to be replayable rather than silent, and a platform hosting multiple tenants had to keep each tenant's data strictly isolated.",
+      ],
+    },
+    constraints: {
+      heading: "Constraints",
+      body: [
+        "The platform had to be honest about failure and about isolation from day one.",
+      ],
+      bullets: [
+        "Delivery: no silent data loss — a failed row goes to a replayable dead-letter queue, never dropped",
+        "Ordering: per-source change order preserved; downstream consumers can lag without blocking capture",
+        "Multi-tenancy: every read and write must be scoped to the caller's tenant — no cross-tenant leakage at any tier",
+        "Extensibility: new connectors and processing rules plug in without modifying the core",
+        "Observability: capture/sync throughput, retries, errors, queue depth, and pipeline operations all surfaced in Grafana",
+        "Composable: a pipeline is a declarative design (source → mappings → transformations → destination) that can be versioned, previewed, and validated before it ships",
+      ],
+    },
+    approach: {
+      heading: "Approach",
+      body: [
+        "I split the platform into an 8-module Gradle build following a hexagonal (ports & adapters) shape. At the center, `syncflow-core` holds the domain — pipeline, CDC, snapshot, connection, governance, and repository domain models with zero framework coupling. Around it, `syncflow-api` is the inbound/adapter side: REST controllers, SSE, Kafka consumers, and orchestration services that translate application concerns into domain calls. On the outbound side, `syncflow-connectors` and the `syncflow-plugin-api` module define the ports — `CdcProvider`, `SnapshotProvider`, `DestinationWriterProvider`, `PluginConnector` — so a new source or target database is a new adapter behind an SPI, never a change to the core.",
+        "The hex boundary is what makes the platform extensible without forking it: the core compiles, tests, and ships independently of which connectors are wired in, and the plugin API is the contract a third party implements.",
+        "Capture is Debezium CDC against source binlogs, publishing Row-level change events to Kafka. Delivery is at-least-once: consumers commit only after the row is durably applied, and a replayable dead-letter queue captures anything that exhausts retries. Snapshot backfill handles the initial full-table copy that CDC can't — the two paths converge on the same target contract.",
+        "The pipeline designer treats a pipeline as a versioned design — source, destination, per-table mappings, and a transformation rule engine (rename, constant, concat, convert, trim, default, substring, expression) — with JSON-snapshot versioning, validation probes, and conflict detection feeding a live preview.",
+        "Multi-tenancy is enforced at the repository/store layer, so every read and write is scoped to the current tenant by construction, not by convention.",
+      ],
+      bullets: [
+        "Hexagonal layout: `syncflow-core` domain at the center; `syncflow-api` inbound adapters; `syncflow-connectors` + `syncflow-plugin-api` outbound SPI ports",
+        "Plugin ports (`CdcProvider`, `SnapshotProvider`, `DestinationWriterProvider`) keep new connectors out of the core",
+        "Debezium CDC → Kafka: at-least-once, ordered per source, with a replayable DLQ",
+        "Snapshot executor for full-table backfill as the companion to live CDC",
+        "Versioned pipeline designs with JSON snapshots, rollback, preview, and conflict detection",
+        "Transformation rule engine for per-table column orchestration",
+        "Distributed agent fleet + workflow scheduler for fan-out and retries",
+        "Observability: Micrometer counters/gauges/timers → Prometheus → Grafana; SSE for live status",
+        "Multi-tenant repo/store scoping guards against cross-tenant leakage",
+      ],
+    },
+    tradeoffs: [
+      {
+        decision: "Transport backbone",
+        chose: "Apache Kafka",
+        over: "In-process queues or a second transactional store",
+        why: "Kafka gives durable, replayable, ordered delivery that decouples capture from apply — a DB write to a queue in-process would lose events the moment the JVM dies, and replay would be impossible.",
+      },
+      {
+        decision: "Live CDC + snapshot duality",
+        chose: "Both as first-class sync modes",
+        over: "CDC-only or snapshot-only",
+        why: "A new target needs the full dataset (snapshot) before it can follow live changes (CDC). Shipping one without the other makes the other case impossible for a real integration.",
+      },
+      {
+        decision: "Delivery semantics",
+        chose: "At-least-once with a replayable DLQ",
+        over: "Exactly-once or fire-and-forget",
+        why: "Exactly-once needs solved distributed-transaction machinery (Kafka transactions + idempotent targets) with real cost; for a data-sync platform, at-least-once plus an idempotent target and a human-replaysable DLQ is the honest, defensible contract.",
+      },
+      {
+        decision: "Extensibility",
+        chose: "Dedicated plugin API module",
+        over: "Everything in-core or annotation-scan auto-wiring",
+        why: "A plugin boundary means new connectors and sources never touch core — the core compiles, tests, and releases independently, and the API is the contract.",
+      },
+      {
+        decision: "Architecture",
+        chose: "Hexagonal (ports & adapters) over layered packages",
+        over: "Controller→Service→Repository by convention",
+        why: "The hex boundary makes dependency direction a build-time property: the domain seems nothing about Kafka, JDBC, or HTTP. Layered packages degenerate into a change blast radius where a new connector drags the core with it; hex keeps adapters swappable and the domain framework-free.",
+      },
+      {
+        decision: "Pipeline-as-versioned-document",
+        chose: "JSON-snapshot design + rollback",
+        over: "Live mutable pipeline config",
+        why: "Treating a pipeline like a code artifact means you can preview, validate, version, and roll back a design instead of mutating shared live state — the same reason version control exists for code.",
+      },
+    ],
+    outcome: [
+      { label: "Modules", value: "8 gradle", hint: "core, api, connectors, security, monitoring, metrics, plugin-api, agent" },
+      { label: "Sync modes", value: "CDC + snapshot", hint: "live binlog + full-table backfill" },
+      { label: "Delivery", value: "At-least-once", hint: "idempotent apply + replayable DLQ" },
+      { label: "Isolation", value: "Multi-tenant", hint: "repo/scoped keying" },
+      { label: "Extensibility", value: "Plugin API", hint: "connectors without core changes" },
+      { label: "Observability", value: "Grafana", hint: "Micrometer → Prometheus, SSE status" },
+    ],
+    lessons: [
+      "A readable data-sync contract is worth more than a marketing one: at-least-once + idempotent targets + a replayable DLQ is what makes an outage replayable instead of a fire drill.",
+      "Multi-tenancy is a construction discipline, not a filter. If the repository layer can't leak, the controller never can — you stop trusting every endpoint to remember to filter.",
+      "CDC and snapshots are complements, not rivals. Shipping both modes is what makes a new-target onboarding actually work.",
+      "The versioned pipeline-as-document model pays off the first time you preview a change, roll it back, or answer 'what changed between last week and now' — the same reason we version code.",
+      "A plugin API is the difference between a platform and a monolith. If the core can compile and ship without 'one more connector', the core will actually ship.",
+    ],
+  },
 ];
 
 export function getCaseStudyBySlug(slug: string): CaseStudy | undefined {
