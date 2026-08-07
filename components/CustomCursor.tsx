@@ -21,14 +21,25 @@ export default function CustomCursor() {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!supportsHover || reducedMotion) return;
 
-    setEnabled(true);
-    document.documentElement.classList.add("custom-cursor");
+    // Defer the cursor until the browser is idle so hydration isn't blocked —
+    // it's a visual nicety, not something the first interaction needs.
+    let cancelled = false;
+    let idle: number | undefined;
+    const mount = () => {
+      if (cancelled) return;
+      setEnabled(true);
+      document.documentElement.classList.add("custom-cursor");
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      idle = window.requestIdleCallback(mount, { timeout: 1500 });
+    } else {
+      idle = window.setTimeout(mount, 0);
+    }
 
     const handleMove = (e: MouseEvent) => {
       x.set(e.clientX);
       y.set(e.clientY);
     };
-
     const handleOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
@@ -37,7 +48,6 @@ export default function CustomCursor() {
       );
       setHovering(!!interactive);
     };
-
     const handleDown = () => setClicked(true);
     const handleUp = () => setClicked(false);
 
@@ -47,6 +57,14 @@ export default function CustomCursor() {
     window.addEventListener("mouseup", handleUp);
 
     return () => {
+      cancelled = true;
+      if (idle !== undefined) {
+        if (typeof window.requestIdleCallback === "function") {
+          window.cancelIdleCallback?.(idle);
+        } else {
+          window.clearTimeout(idle);
+        }
+      }
       document.documentElement.classList.remove("custom-cursor");
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mouseover", handleOver);

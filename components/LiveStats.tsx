@@ -40,10 +40,22 @@ export default function LiveStats() {
 
   useEffect(() => {
     let cancel = false;
-    fetch("/api/stats", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => !cancel && setStats(d))
-      .catch(() => !cancel && setError(true));
+    // Defer the fetch until the browser is idle so it doesn't compete with
+    // the first paint / interaction for the main thread.
+    const load = () => {
+      fetch("/api/stats", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((d) => !cancel && setStats(d))
+        .catch(() => !cancel && setError(true));
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(load, { timeout: 3000 });
+      return () => {
+        cancel = true;
+        window.cancelIdleCallback?.(id);
+      };
+    }
+    load();
     return () => {
       cancel = true;
     };
