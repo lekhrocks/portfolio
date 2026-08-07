@@ -88,6 +88,8 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="preconnect" href="https://va.vercel-scripts.com" crossOrigin="" />
+        <link rel="preconnect" href="https://vitals.vercel-insights.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://www.google.com" />
         <link rel="dns-prefetch" href="https://leetcode.com" />
         <link rel="dns-prefetch" href="https://github.com" />
