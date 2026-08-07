@@ -280,6 +280,22 @@ export default function RouterDiagram({
           ].join(" ")}
         />
       )}
+
+      {/* Trace particle — failure path: CB trips → retry → still fails → rate limiter sheds */}
+      {fail && (
+        <TraceParticle
+          playKey={playKey}
+          duration={6}
+          tone="failure"
+          path={[
+            "M 440 108",                 // gateway
+            "L 200 133",                 // → rate limiter
+            "L 395 232",                 // → CB
+            "L 395 289",                 // → retry (fails)
+            "L 530 133",                 // → back to gateway / shed
+          ].join(" ")}
+        />
+      )}
     </DiagramFrame>
   );
 }

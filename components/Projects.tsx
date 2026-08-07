@@ -11,6 +11,7 @@ import {
   BriefcaseBusiness,
   LayoutDashboard,
   Bot,
+  RefreshCw,
 } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
 import SectionHeader from "@/components/console/SectionHeader";
@@ -162,6 +163,26 @@ const services: Service[] = [
       { label: "routes",    value: "12 pages" },
       { label: "real-time", value: "SSE chat" },
       { label: "auth",      value: "3 channels" },
+    ],
+  },
+  {
+    id: "syncflow",
+    title: "syncflow",
+    subtitle: "Open-source data sync platform — CDC, snapshots, pipeline designer, multi-DB connectors",
+    description:
+      "Java 25 + Spring Boot control plane for moving data between databases. Hexagonal (ports & adapters) architecture around a `syncflow-core` domain: Debezium CDC capture, snapshot backfill, a versioned pipeline designer with conflict detection and a transformation rule engine, a workflow scheduler, and a distributed agent fleet. Inbound adapters in `syncflow-api`, and outbound connectors behind a plugin SPI (`CdcProvider`, `SnapshotProvider`, `DestinationWriterProvider`). Multi-tenant data isolation, Kafka transport with a replayable DLQ, and a Micrometer → Prometheus/Grafana observability stack.",
+    icon: RefreshCw,
+    status: "info",
+    statusLabel: "open source",
+    githubUrl: "https://github.com/lekhrocks/syncflow",
+    tags: [
+      "Java 25", "Spring Boot", "Debezium CDC", "Apache Kafka", "PostgreSQL",
+      "Hexagonal Architecture", "Multi-tenant", "Plugin API", "Grafana", "Docker",
+    ],
+    metrics: [
+      { label: "modules",       value: "8 gradle" },
+      { label: "sync modes",    value: "CDC + snapshot" },
+      { label: "connectors",    value: "multi-DB" },
     ],
   },
 ];

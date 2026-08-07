@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Download } from "lucide-react";
 
@@ -15,6 +16,7 @@ const navItems = [
 ];
 
 export default function Navbar() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("");
@@ -47,13 +49,27 @@ export default function Navbar() {
   }, []);
 
   const handleNavClick = (href: string) => {
-    setIsOpen(false);
-    const el = document.getElementById(href.slice(1));
-    if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - 60;
-      window.scrollTo({ top, behavior: "smooth" });
-    }
-  };
+  setIsOpen(false);
+  const id = href.slice(1);
+  // If we're on the homepage, the section exists — scroll straight to it.
+  if (window.location.pathname === "/") {
+    scrollToSection(id);
+    return;
+  }
+  // On any other page (case studies, resume, …) the section doesn't exist,
+  // so navigate home first and then scroll once the homepage is mounted.
+  router.push("/#" + id);
+  // The hash-jump can fire before the homepage hydrates; re-scroll after a
+  // beat so the smooth-scroll lands reliably.
+  setTimeout(scrollToSection, 400, id);
+};
+
+const scrollToSection = (id: string) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
 
   return (
     <motion.nav
